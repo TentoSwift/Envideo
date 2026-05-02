@@ -1,0 +1,545 @@
+#usda 1.0
+(
+    defaultPrim = "Root"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "Root"
+{
+    def Xform "CinemaScene"
+    {
+        float3 xformOp:rotateXYZ = (0, 180, 0)
+        uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]
+
+        def "Cinema" (
+            prepend references = @Cinema.usdc@
+        )
+        {
+            over "VideoScreen"
+            {
+                token visibility = "invisible"
+            }
+
+            over "ScreenFrame"
+            {
+                token visibility = "invisible"
+            }
+
+            over "Floor"
+            {
+                over "立方体_001"
+                {
+                    rel material:binding = </Root/Materials/FloorReflectMat>
+                }
+            }
+
+            over "Ceiling"
+            {
+                over "立方体_002"
+                {
+                    rel material:binding = </Root/Materials/CeilingReflectMat>
+                }
+            }
+        }
+    }
+
+    def Xform "Video_Dock"
+    {
+        double3 xformOp:translate = (0, 5.5, -14)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+
+        def Xform "Player"
+        {
+            def RealityKitComponent "CustomDockingRegion"
+            {
+                token info:id = "RealityKit.CustomDockingRegion"
+
+                def RealityKitStruct "m_bounds"
+                {
+                    float3 max = (12.0, 5.0, 0)
+                    float3 min = (-12.0, -5.0, 0)
+                }
+            }
+        }
+    }
+
+    def Scope "Materials"
+    {
+        def Material "FloorReflectMat"
+        {
+            token outputs:mtlx:surface.connect = </Root/Materials/FloorReflectMat/UnlitSurface.outputs:out>
+
+            def Shader "ReflectionSpecular"
+            {
+                uniform token info:id = "ND_realitykit_light_spill_specular"
+                float2 inputs:antialiasingStrength = (32.0, 32.0)
+                float3 inputs:normal.connect = </Root/Materials/FloorReflectMat/PerturbedNormal.outputs:out>
+                float3 inputs:unreflected_direction.connect = </Root/Materials/FloorReflectMat/ViewDirection.outputs:out>
+                color4f outputs:out
+            }
+
+            def Shader "Normal"
+            {
+                uniform token info:id = "ND_normal_vector3"
+                string inputs:space = "world"
+                float3 outputs:out
+            }
+
+            // === 法線にノイズを混ぜて反射を粗くする ===
+            def Shader "Position"
+            {
+                uniform token info:id = "ND_position_vector3"
+                string inputs:space = "world"
+                float3 outputs:out
+            }
+
+            // 位置を50倍 → ノイズの波長が 1/50 (約2cm) になり、細かいザラザラ感に
+            def Shader "PositionHighFreq"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </Root/Materials/FloorReflectMat/Position.outputs:out>
+                float inputs:in2 = 50.0
+                float3 outputs:out
+            }
+
+            def Shader "NoiseR"
+            {
+                uniform token info:id = "ND_noise3d_float"
+                float inputs:amplitude = 1.0
+                float inputs:pivot = 0.0
+                float3 inputs:position.connect = </Root/Materials/FloorReflectMat/PositionHighFreq.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "NoiseG"
+            {
+                uniform token info:id = "ND_noise3d_float"
+                float inputs:amplitude = 1.0
+                float inputs:pivot = 0.0
+                float3 inputs:position.connect = </Root/Materials/FloorReflectMat/PositionShifted.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "PositionShifted"
+            {
+                uniform token info:id = "ND_add_vector3"
+                float3 inputs:in1.connect = </Root/Materials/FloorReflectMat/PositionHighFreq.outputs:out>
+                float3 inputs:in2 = (100, 200, 300)
+                float3 outputs:out
+            }
+
+            def Shader "NoiseVec"
+            {
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = </Root/Materials/FloorReflectMat/NoiseR.outputs:out>
+                float inputs:in2.connect = </Root/Materials/FloorReflectMat/NoiseG.outputs:out>
+                float inputs:in3 = 0.0
+                float3 outputs:out
+            }
+
+            def Shader "NoiseScaled"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </Root/Materials/FloorReflectMat/NoiseVec.outputs:out>
+                float inputs:in2 = 0.08
+                float3 outputs:out
+            }
+
+            def Shader "PerturbedNormalRaw"
+            {
+                uniform token info:id = "ND_add_vector3"
+                float3 inputs:in1.connect = </Root/Materials/FloorReflectMat/Normal.outputs:out>
+                float3 inputs:in2.connect = </Root/Materials/FloorReflectMat/NoiseScaled.outputs:out>
+                float3 outputs:out
+            }
+
+            // 単位ベクトルに正規化(長さを1に揃える) — 反射方向が暴れすぎないように
+            def Shader "PerturbedNormal"
+            {
+                uniform token info:id = "ND_normalize_vector3"
+                float3 inputs:in.connect = </Root/Materials/FloorReflectMat/PerturbedNormalRaw.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "ViewDirection"
+            {
+                uniform token info:id = "ND_realitykit_viewdirection_vector3"
+                string inputs:space = "world"
+                float3 outputs:out
+            }
+
+            def Shader "Swizzle"
+            {
+                uniform token info:id = "ND_swizzle_color4_color3"
+                string inputs:channels = "rgb"
+                color4f inputs:in.connect = </Root/Materials/FloorReflectMat/ReflectionSpecular.outputs:out>
+                color3f outputs:out
+            }
+
+            // === スクリーン光が斜めに広がるコーンマスク ===
+            // X,Z座標から「Z(奥行)が増える(観客側)ほど許容X幅が広がる」マスクを作る
+            def Shader "PositionX"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                string inputs:channels = "x"
+                float3 inputs:in.connect = </Root/Materials/FloorReflectMat/Position.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "PositionZ"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                string inputs:channels = "z"
+                float3 inputs:in.connect = </Root/Materials/FloorReflectMat/Position.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "AbsX"
+            {
+                uniform token info:id = "ND_absval_float"
+                float inputs:in.connect = </Root/Materials/FloorReflectMat/PositionX.outputs:out>
+                float outputs:out
+            }
+
+            // 動的しきい値: スクリーンZ=-14 を基準に観客側に行くほど広がる
+            // 半幅 = 6 + 0.6 * (Z + 14) = 14.4 + 0.6Z
+            // Z=-14(スクリーン): ±6m、Z=0(中央): ±14.4m、Z=+10(奥): ±20.4m
+            def Shader "ZScaled"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </Root/Materials/FloorReflectMat/PositionZ.outputs:out>
+                float inputs:in2 = 0.6
+                float outputs:out
+            }
+
+            def Shader "DynamicThreshold"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </Root/Materials/FloorReflectMat/ZScaled.outputs:out>
+                float inputs:in2 = 14.4
+                float outputs:out
+            }
+
+            def Shader "DynamicHigh"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </Root/Materials/FloorReflectMat/DynamicThreshold.outputs:out>
+                float inputs:in2 = 2.0
+                float outputs:out
+            }
+
+            // smoothstep(threshold, threshold+2, |X|) → 内側 0、外側 1
+            def Shader "OutsideMask"
+            {
+                uniform token info:id = "ND_smoothstep_float"
+                float inputs:low.connect = </Root/Materials/FloorReflectMat/DynamicThreshold.outputs:out>
+                float inputs:high.connect = </Root/Materials/FloorReflectMat/DynamicHigh.outputs:out>
+                float inputs:in.connect = </Root/Materials/FloorReflectMat/AbsX.outputs:out>
+                float outputs:out
+            }
+
+            // 1 - smoothstep → 内側 1、外側 0
+            def Shader "InsideMask"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1.0
+                float inputs:in2.connect = </Root/Materials/FloorReflectMat/OutsideMask.outputs:out>
+                float outputs:out
+            }
+
+            // === スクリーンからの奥行(Z)方向の制限 ===
+            // スクリーン Z=-14 から手前(audience側=+Z) に5mまで反射、7mで完全フェード
+            // 距離 = Z - (-14) = Z + 14
+            def Shader "ZFromScreen"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </Root/Materials/FloorReflectMat/PositionZ.outputs:out>
+                float inputs:in2 = 14.0
+                float outputs:out
+            }
+
+            // smoothstep(0, 11, distance) → スクリーンから徐々にフェード、11mで0
+            def Shader "FarMask"
+            {
+                uniform token info:id = "ND_smoothstep_float"
+                float inputs:low = 0.0
+                float inputs:high = 11.0
+                float inputs:in.connect = </Root/Materials/FloorReflectMat/ZFromScreen.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "NearMask"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1.0
+                float inputs:in2.connect = </Root/Materials/FloorReflectMat/FarMask.outputs:out>
+                float outputs:out
+            }
+
+            // X方向マスク × Z方向マスク = 全体マスク
+            def Shader "CombinedMask"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </Root/Materials/FloorReflectMat/InsideMask.outputs:out>
+                float inputs:in2.connect = </Root/Materials/FloorReflectMat/NearMask.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "MaskedColor"
+            {
+                uniform token info:id = "ND_multiply_color3FA"
+                color3f inputs:in1.connect = </Root/Materials/FloorReflectMat/Swizzle.outputs:out>
+                float inputs:in2.connect = </Root/Materials/FloorReflectMat/MaskTimesIntensity.outputs:out>
+                color3f outputs:out
+            }
+
+            // マスク × 強度(0.0〜1.0) で全体の濃さを下げる
+            def Shader "MaskTimesIntensity"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </Root/Materials/FloorReflectMat/CombinedMask.outputs:out>
+                float inputs:in2 = 0.18
+                float outputs:out
+            }
+
+            def Shader "UnlitSurface"
+            {
+                uniform token info:id = "ND_realitykit_unlit_surfaceshader"
+                color3f inputs:color.connect = </Root/Materials/FloorReflectMat/MaskedColor.outputs:out>
+                token outputs:out
+            }
+        }
+
+        // === 天井用 (Floorのコピー、奥行マスクを 7m に短縮) ===
+        def Material "CeilingReflectMat"
+        {
+            token outputs:mtlx:surface.connect = </Root/Materials/CeilingReflectMat/UnlitSurface.outputs:out>
+
+            def Shader "ReflectionSpecular"
+            {
+                uniform token info:id = "ND_realitykit_light_spill_specular"
+                float2 inputs:antialiasingStrength = (32.0, 32.0)
+                float3 inputs:normal.connect = </Root/Materials/CeilingReflectMat/PerturbedNormal.outputs:out>
+                float3 inputs:unreflected_direction.connect = </Root/Materials/CeilingReflectMat/ViewDirection.outputs:out>
+                color4f outputs:out
+            }
+
+            def Shader "Normal"
+            {
+                uniform token info:id = "ND_normal_vector3"
+                string inputs:space = "world"
+                float3 outputs:out
+            }
+
+            def Shader "Position"
+            {
+                uniform token info:id = "ND_position_vector3"
+                string inputs:space = "world"
+                float3 outputs:out
+            }
+
+            def Shader "PositionHighFreq"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </Root/Materials/CeilingReflectMat/Position.outputs:out>
+                float inputs:in2 = 50.0
+                float3 outputs:out
+            }
+
+            def Shader "NoiseR"
+            {
+                uniform token info:id = "ND_noise3d_float"
+                float inputs:amplitude = 1.0
+                float inputs:pivot = 0.0
+                float3 inputs:position.connect = </Root/Materials/CeilingReflectMat/PositionHighFreq.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "PositionShifted"
+            {
+                uniform token info:id = "ND_add_vector3"
+                float3 inputs:in1.connect = </Root/Materials/CeilingReflectMat/PositionHighFreq.outputs:out>
+                float3 inputs:in2 = (100, 200, 300)
+                float3 outputs:out
+            }
+
+            def Shader "NoiseG"
+            {
+                uniform token info:id = "ND_noise3d_float"
+                float inputs:amplitude = 1.0
+                float inputs:pivot = 0.0
+                float3 inputs:position.connect = </Root/Materials/CeilingReflectMat/PositionShifted.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "NoiseVec"
+            {
+                uniform token info:id = "ND_combine3_vector3"
+                float inputs:in1.connect = </Root/Materials/CeilingReflectMat/NoiseR.outputs:out>
+                float inputs:in2.connect = </Root/Materials/CeilingReflectMat/NoiseG.outputs:out>
+                float inputs:in3 = 0.0
+                float3 outputs:out
+            }
+
+            def Shader "NoiseScaled"
+            {
+                uniform token info:id = "ND_multiply_vector3FA"
+                float3 inputs:in1.connect = </Root/Materials/CeilingReflectMat/NoiseVec.outputs:out>
+                float inputs:in2 = 0.08
+                float3 outputs:out
+            }
+
+            def Shader "PerturbedNormalRaw"
+            {
+                uniform token info:id = "ND_add_vector3"
+                float3 inputs:in1.connect = </Root/Materials/CeilingReflectMat/Normal.outputs:out>
+                float3 inputs:in2.connect = </Root/Materials/CeilingReflectMat/NoiseScaled.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "PerturbedNormal"
+            {
+                uniform token info:id = "ND_normalize_vector3"
+                float3 inputs:in.connect = </Root/Materials/CeilingReflectMat/PerturbedNormalRaw.outputs:out>
+                float3 outputs:out
+            }
+
+            def Shader "ViewDirection"
+            {
+                uniform token info:id = "ND_realitykit_viewdirection_vector3"
+                string inputs:space = "world"
+                float3 outputs:out
+            }
+
+            def Shader "Swizzle"
+            {
+                uniform token info:id = "ND_swizzle_color4_color3"
+                string inputs:channels = "rgb"
+                color4f inputs:in.connect = </Root/Materials/CeilingReflectMat/ReflectionSpecular.outputs:out>
+                color3f outputs:out
+            }
+
+            def Shader "PositionX"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                string inputs:channels = "x"
+                float3 inputs:in.connect = </Root/Materials/CeilingReflectMat/Position.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "PositionZ"
+            {
+                uniform token info:id = "ND_swizzle_vector3_float"
+                string inputs:channels = "z"
+                float3 inputs:in.connect = </Root/Materials/CeilingReflectMat/Position.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "AbsX"
+            {
+                uniform token info:id = "ND_absval_float"
+                float inputs:in.connect = </Root/Materials/CeilingReflectMat/PositionX.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "ZScaled"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </Root/Materials/CeilingReflectMat/PositionZ.outputs:out>
+                float inputs:in2 = 0.6
+                float outputs:out
+            }
+
+            def Shader "DynamicThreshold"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </Root/Materials/CeilingReflectMat/ZScaled.outputs:out>
+                float inputs:in2 = 14.4
+                float outputs:out
+            }
+
+            def Shader "DynamicHigh"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </Root/Materials/CeilingReflectMat/DynamicThreshold.outputs:out>
+                float inputs:in2 = 2.0
+                float outputs:out
+            }
+
+            def Shader "OutsideMask"
+            {
+                uniform token info:id = "ND_smoothstep_float"
+                float inputs:low.connect = </Root/Materials/CeilingReflectMat/DynamicThreshold.outputs:out>
+                float inputs:high.connect = </Root/Materials/CeilingReflectMat/DynamicHigh.outputs:out>
+                float inputs:in.connect = </Root/Materials/CeilingReflectMat/AbsX.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "InsideMask"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1.0
+                float inputs:in2.connect = </Root/Materials/CeilingReflectMat/OutsideMask.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "ZFromScreen"
+            {
+                uniform token info:id = "ND_add_float"
+                float inputs:in1.connect = </Root/Materials/CeilingReflectMat/PositionZ.outputs:out>
+                float inputs:in2 = 14.0
+                float outputs:out
+            }
+
+            // 天井: スクリーンから 7m まで徐々に減衰
+            def Shader "FarMask"
+            {
+                uniform token info:id = "ND_smoothstep_float"
+                float inputs:low = 0.0
+                float inputs:high = 7.0
+                float inputs:in.connect = </Root/Materials/CeilingReflectMat/ZFromScreen.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "NearMask"
+            {
+                uniform token info:id = "ND_subtract_float"
+                float inputs:in1 = 1.0
+                float inputs:in2.connect = </Root/Materials/CeilingReflectMat/FarMask.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "CombinedMask"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </Root/Materials/CeilingReflectMat/InsideMask.outputs:out>
+                float inputs:in2.connect = </Root/Materials/CeilingReflectMat/NearMask.outputs:out>
+                float outputs:out
+            }
+
+            def Shader "MaskTimesIntensity"
+            {
+                uniform token info:id = "ND_multiply_float"
+                float inputs:in1.connect = </Root/Materials/CeilingReflectMat/CombinedMask.outputs:out>
+                float inputs:in2 = 0.18
+                float outputs:out
+            }
+
+            def Shader "MaskedColor"
+            {
+                uniform token info:id = "ND_multiply_color3FA"
+                color3f inputs:in1.connect = </Root/Materials/CeilingReflectMat/Swizzle.outputs:out>
+                float inputs:in2.connect = </Root/Materials/CeilingReflectMat/MaskTimesIntensity.outputs:out>
+                color3f outputs:out
+            }
+
+            def Shader "UnlitSurface"
+            {
+                uniform token info:id = "ND_realitykit_unlit_surfaceshader"
+                color3f inputs:color.connect = </Root/Materials/CeilingReflectMat/MaskedColor.outputs:out>
+                token outputs:out
+            }
+        }
+    }
+}

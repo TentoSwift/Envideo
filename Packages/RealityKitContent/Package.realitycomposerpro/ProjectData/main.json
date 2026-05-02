@@ -1,0 +1,12 @@
+{
+  "pathsToIds" : {
+    "\/RealityKitContent\/Sources\/RealityKitContent\/RealityKitContent.rkassets\/CinemaRoom.usda" : "D07DBCF3-25C1-439F-95CC-B02CC26E12CE",
+    "RealityKitContent\/Sources\/RealityKitContent\/RealityKitContent.rkassets\/AAA_MainScene.usda" : "18A74DA8-3425-4C6E-83ED-4B1D67C72395",
+    "RealityKitContent\/Sources\/RealityKitContent\/RealityKitContent.rkassets\/Immersive.usda" : "C6A7F375-BFE9-46E0-9EA6-1A6B150F43FD"
+  },
+  "projectID" : 4360230263172360024,
+  "uuidToIntID" : {
+    "18A74DA8-3425-4C6E-83ED-4B1D67C72395" : 1851333231334413268,
+    "D07DBCF3-25C1-439F-95CC-B02CC26E12CE" : -5864813936687984995
+  }
+}

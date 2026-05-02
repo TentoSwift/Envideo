@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		2D8DA5AF2F485D0800707FC3 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; productRef = 2D8DA5AE2F485D0800707FC3 /* RealityKitContent */; };
-		2DC8CDB32FA610CB00A90072 /* YoutubeKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2DC8CDB22FA610CB00A90072 /* YoutubeKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,7 +58,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				2D8DA5AF2F485D0800707FC3 /* RealityKitContent in Frameworks */,
-				2DC8CDB32FA610CB00A90072 /* YoutubeKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,7 +119,6 @@
 			name = "File Environment";
 			packageProductDependencies = (
 				2D8DA5AE2F485D0800707FC3 /* RealityKitContent */,
-				2DC8CDB22FA610CB00A90072 /* YoutubeKit */,
 			);
 			productName = "File Environment";
 			productReference = 2D8DA5A92F485D0800707FC3 /* File Environment.app */;
@@ -212,7 +209,6 @@
 			mainGroup = 2D8DA5A02F485D0800707FC3;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				2DC8CDB12FA610CB00A90072 /* XCRemoteSwiftPackageReference "YoutubeKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2D8DA5AA2F485D0800707FC3 /* Products */;
@@ -533,26 +529,10 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		2DC8CDB12FA610CB00A90072 /* XCRemoteSwiftPackageReference "YoutubeKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/rinov/YoutubeKit.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.13.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		2D8DA5AE2F485D0800707FC3 /* RealityKitContent */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RealityKitContent;
-		};
-		2DC8CDB22FA610CB00A90072 /* YoutubeKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2DC8CDB12FA610CB00A90072 /* XCRemoteSwiftPackageReference "YoutubeKit" */;
-			productName = YoutubeKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

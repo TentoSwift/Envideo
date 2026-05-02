@@ -21,9 +21,13 @@ struct CustomButtonStyle: ButtonStyle {
 
 struct ContentView: View {
     @StateObject var playerController = PlayerController()
+    @State var store = StoreManager()
     @AppStorage("videoHistoryBookmarks") var historyData: Data = Data()
     @AppStorage("videoPositionsByBookmarkKey") var positionsData: Data = Data()
     @AppStorage("videoDurationsByBookmarkKey") var durationsData: Data = Data()
+
+    @Environment(\.openImmersiveSpace) private var openImmersiveSpace
+    @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
 
     @State var thumbnails: [String: Image] = [:]
     @State var videoHistory: [HistoryItem] = []
@@ -32,33 +36,18 @@ struct ContentView: View {
 
     @State var selectedItem: HistoryItem? = nil
     @State var isImporterPresented = false
-    @State var aspectRatio: CGFloat = 9/16
+    @State var isPaywallPresented = false
     @State var isFullScreen = false
-    @State var isDisplayHistory: Bool = false
+    @State var isYouTubeAddPresented = false
+    @State var isYouTubeBrowserPresented = false
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @State private var isOnboardingPresented = false
+    @State private var didSetupRemoteCommands = false
 
     var body: some View {
         NavigationStack {
             Group {
-                if let item = selectedItem, let url = item.url {
-                    PlayerContainerView(
-                        url: url,
-                        initialPosition: positions[item.key] ?? 0,
-                        onProgress: { savePosition(key: item.key, seconds: $0) },
-                        onDuration: { saveDuration(key: item.key, seconds: $0) },
-                        onAspectRatio: { aspectRatio = $0 },
-                        playerController: playerController
-                    )
-                    .frame(maxWidth: .infinity)
-                    .aspectRatio(1 / aspectRatio, contentMode: .fit)
-                    .cornerRadius(10)
-                    .id(item.key)
-                    .contentShape(Rectangle())
-                    .simultaneousGesture(
-                        TapGesture().onEnded {
-                            withAnimation { isDisplayHistory = false }
-                        }
-                    )
-                } else if videoHistory.isEmpty {
+                if videoHistory.isEmpty {
                     VStack(spacing: 24) {
                         Image(systemName: "film.stack")
                             .font(.system(size: 64))
@@ -76,18 +65,20 @@ struct ContentView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    List {
-                        Section("再生履歴") {
+                    ScrollView {
+                        LazyVGrid(
+                            columns: [GridItem(.adaptive(minimum: 280), spacing: 16)],
+                            spacing: 16
+                        ) {
                             ForEach(videoHistory) { item in
-                                historyRow(item)
+                                historyGridCard(item)
                             }
                         }
-                        Section {
-                            Button("動画を追加", systemImage: "plus") {
-                                isImporterPresented.toggle()
-                            }
-                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                        .padding(.top, 72)
                     }
+                    .navigationTitle("再生履歴")
                 }
             }
             .ignoresSafeArea()
@@ -98,11 +89,31 @@ struct ContentView: View {
                 loadHistory()
                 loadPositions()
                 loadDurations()
+                if !didSetupRemoteCommands {
+                    setupRemoteCommands()
+                    didSetupRemoteCommands = true
+                }
+                if !hasSeenOnboarding {
+                    isOnboardingPresented = true
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .updateThumbnail)) { _ in
                 guard let item = selectedItem else { return }
                 thumbnails[item.key] = nil
                 generateThumbnail(for: item)
+            }
+            .onChange(of: store.isPurchased) { _, isPurchased in
+                if !isPurchased { trimHistoryToLimit() }
+            }
+            .onChange(of: selectedItem) { _, item in
+                isFullScreen = item != nil
+            }
+            .onChange(of: isFullScreen) { _, full in
+                if !full {
+                    playerController.player?.pause()
+                    playerController.player?.replaceCurrentItem(with: nil)
+                    selectedItem = nil
+                }
             }
             .fileImporter(
                 isPresented: $isImporterPresented,
@@ -114,24 +125,65 @@ struct ContentView: View {
                 }
             }
         }
-        .onTapGesture {
-            withAnimation { isDisplayHistory = false }
+        .sheet(isPresented: $isPaywallPresented) {
+            PaywallView().environment(store)
+        }
+        .sheet(isPresented: $isYouTubeAddPresented) {
+            YouTubeAddView(isPresented: $isYouTubeAddPresented) { videoID, title in
+                addYouTubeVideo(videoID: videoID, title: title)
+            }
+        }
+        .sheet(isPresented: $isYouTubeBrowserPresented) {
+            YouTubeBrowserView(isPresented: $isYouTubeBrowserPresented) { videoID, title in
+                addYouTubeVideo(videoID: videoID, title: title)
+            }
+        }
+        .sheet(isPresented: $isOnboardingPresented, onDismiss: {
+            hasSeenOnboarding = true
+        }) {
+            OnboardingView(isPresented: $isOnboardingPresented)
+                .interactiveDismissDisabled()
         }
         .fullScreenCover(isPresented: $isFullScreen) {
-            if let player = playerController.player {
-                FullScreenPlayerView(
-                    player: player,
+            if let item = selectedItem {
+                FullScreenPlayerWrapper(
+                    item: item,
                     videoHistory: videoHistory,
                     thumbnails: thumbnails,
                     positions: positions,
                     durations: durations,
-                    selectedKey: selectedItem?.key,
-                    onSelect: { item in
-                        playerController.player?.pause()
-                        selectedItem = item
+                    playerController: playerController,
+                    onProgress: { savePosition(key: $0, seconds: $1) },
+                    onDuration: { saveDuration(key: $0, seconds: $1) },
+                    onSelect: { selectedItem = $0 },
+                    onAdd: { addToHistoryAndSelect($0) },
+                    onEnded: { _ in
+                        savePosition(key: item.key, seconds: 0)
+                        Task { @MainActor in
+                            if CinemaState.shared.isImmersiveOpen {
+                                await dismissImmersiveSpace()
+                            }
+                            isFullScreen = false
+                        }
                     },
                     isPresented: $isFullScreen
                 )
+                .immersiveEnvironmentPicker {
+                    Button {
+                        Task {
+                            await openImmersiveSpace(id: ImmersiveIDs.cinema)
+                        }
+                    } label: {
+                        Label("シネマ", systemImage: "theatermasks.fill")
+                    }
+                    Button {
+                        Task {
+                            await openImmersiveSpace(id: ImmersiveIDs.studio)
+                        }
+                    } label: {
+                        Label("スタジオ", systemImage: "film.stack.fill")
+                    }
+                }
             }
         }
     }
@@ -140,155 +192,44 @@ struct ContentView: View {
 
     @ViewBuilder
     private var bottomBar: some View {
-        VStack(alignment: .center) {
-            HStack {
-                if let item = selectedItem {
-                    playbackControls(item: item)
-                } else {
-                    Button {
-                        isImporterPresented.toggle()
-                    } label: {
-                        Label("動画を追加", systemImage: "plus")
-                            .font(.system(size: 18, weight: .semibold))
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 14)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .frame(width: 850)
-            .frame(maxHeight: 50)
-            .padding()
-            .glassBackgroundEffect()
-            .clipShape(Capsule())
-
-            if isDisplayHistory {
-                ScrollView(.horizontal) {
-                    HStack(spacing: 20) {
-                        ForEach(videoHistory) { item in
-                            historyRow1(item)
-                        }
-                    }
-                    .scrollTargetLayout()
-                }
-                .scrollInputBehavior(.enabled, for: .look)
-                .contentMargins(.horizontal, 20)
-                .frame(width: 1000)
-                .frame(height: 250)
-                .scrollIndicators(.hidden)
-                .glassBackgroundEffect()
-                .scrollTargetBehavior(.viewAligned)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func playbackControls(item: HistoryItem) -> some View {
-        HStack {
-            Button { playerController.skip(by: -15) } label: {
-                Label("15秒戻す", systemImage: "gobackward.15")
-                    .labelStyle(.iconOnly)
-                    .font(.system(size: 28))
-                    .fontWeight(.semibold)
-                    .padding()
+        HStack(spacing: 4) {
+            Button {
+                isImporterPresented.toggle()
+            } label: {
+                Label("動画を追加", systemImage: "plus")
+                    .font(.system(size: 18, weight: .semibold))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
             }
             .buttonStyle(.plain)
 
-            Button { playerController.toggle() } label: {
-                Label(
-                    playerController.isPlaying ? "停止" : "再生",
-                    systemImage: playerController.isPlaying ? "pause.fill" : "play.fill"
-                )
-                .contentTransition(.symbolEffect(.replace))
-                .labelStyle(.iconOnly)
-                .font(.system(size: 40))
-                .fontWeight(.semibold)
-                .padding()
+            Divider().frame(height: 24)
+
+            Button {
+                isYouTubeBrowserPresented = true
+            } label: {
+                Label("YouTubeを開く", systemImage: "play.rectangle")
+                    .font(.system(size: 18, weight: .semibold))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
             }
             .buttonStyle(.plain)
 
-            Button { playerController.skip(by: 15) } label: {
-                Label("15秒スキップ", systemImage: "goforward.15")
-                    .labelStyle(.iconOnly)
-                    .font(.system(size: 28))
-                    .fontWeight(.semibold)
-                    .padding()
+            Divider().frame(height: 24)
+
+            Button {
+                isYouTubeAddPresented = true
+            } label: {
+                Label("URLで追加", systemImage: "link")
+                    .font(.system(size: 18, weight: .semibold))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
             }
             .buttonStyle(.plain)
         }
-        .frame(width: 200)
-
-        VStack(alignment: .leading) {
-            Spacer()
-            Text(item.displayName)
-                .lineLimit(1)
-                .padding(.bottom, 10)
-                .padding(.leading, 10)
-            if playerController.duration > 0 {
-                Slider(
-                    value: $playerController.currentTime,
-                    in: 0...playerController.duration,
-                    onEditingChanged: { editing in
-                        if !editing { playerController.seek(to: playerController.currentTime) }
-                    }
-                )
-                .tint(.gray.mix(with: .white, by: 0.9).opacity(0.8))
-                .frame(maxWidth: .infinity, maxHeight: 10)
-            }
-            Spacer()
-        }
-        .padding(.trailing)
-        .padding(.bottom)
-
-        Button { isFullScreen = true } label: {
-            Label("全画面", systemImage: "arrow.up.left.and.arrow.down.right")
-                .labelStyle(.iconOnly)
-                .font(.system(size: 30))
-                .fontWeight(.semibold)
-                .padding()
-        }
-        .buttonStyle(.plain)
-
-        Button {
-            withAnimation { isImporterPresented.toggle() }
-        } label: {
-            Label("追加", systemImage: "plus")
-                .fontWeight(.semibold)
-                .labelStyle(.iconOnly)
-                .font(.largeTitle)
-                .bold()
-                .padding()
-        }
-        .buttonStyle(.plain)
-
-        Button {
-            withAnimation { isDisplayHistory.toggle() }
-        } label: {
-            ZStack {
-                if isDisplayHistory {
-                    Capsule()
-                        .fill(.white)
-                        .frame(width: 70, height: 55)
-                    Label("履歴", systemImage: "list.bullet")
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                        .labelStyle(.iconOnly)
-                        .font(.largeTitle)
-                        .bold()
-                        .padding()
-                        .blendMode(.destinationOut)
-                } else {
-                    Label("履歴", systemImage: "list.bullet")
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.white)
-                        .labelStyle(.iconOnly)
-                        .font(.largeTitle)
-                        .bold()
-                        .padding()
-                }
-            }
-            .compositingGroup()
-        }
-        .buttonStyle(.plain)
+        .frame(maxHeight: 50)
+        .padding()
+        .glassBackgroundEffect()
+        .clipShape(Capsule())
     }
 }

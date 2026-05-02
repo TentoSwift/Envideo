@@ -3,6 +3,90 @@ import AVKit
 
 extension ContentView {
 
+    // MARK: - Grid card
+
+    @ViewBuilder
+    func historyGridCard(_ item: HistoryItem) -> some View {
+        let saved = positions[item.key] ?? 0
+        let total = durations[item.key] ?? 0
+
+        Button { selectedItem = item } label: {
+            ZStack(alignment: .bottomLeading) {
+                Group {
+                    if let thumb = thumbnails[item.key] {
+                        thumb.resizable().scaledToFill()
+                    } else {
+                        Rectangle()
+                            .fill(.gray.opacity(0.25))
+                            .overlay {
+                                Image(systemName: "film")
+                                    .font(.system(size: 32))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .onAppear {
+                                if thumbnails[item.key] == nil { generateThumbnail(for: item) }
+                            }
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(item.displayName)
+                            .lineLimit(1)
+                            .fontWeight(.bold)
+                            .font(.caption)
+                        Spacer()
+                        if total > 0 {
+                            Text(formatDuration(total))
+                                .font(.system(.caption, design: .rounded))
+                        }
+                    }
+                    .foregroundStyle(.white)
+                    if total > 0 {
+                        ProgressView(value: saved, total: max(total, 1))
+                            .tint(.white.opacity(0.8))
+                    }
+                }
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
+                .padding(.top)
+                .background {
+                    UnevenRoundedRectangle(
+                        topLeadingRadius: 0, bottomLeadingRadius: 12,
+                        bottomTrailingRadius: 12, topTrailingRadius: 0
+                    )
+                    .fill(.ultraThickMaterial)
+                    .environment(\.colorScheme, .light)
+                    .mask {
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: .clear, location: 0.0),
+                                .init(color: .black.opacity(0.8), location: 0.45),
+                                .init(color: .black, location: 0.6),
+                                .init(color: .white, location: 1.0)
+                            ]),
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .aspectRatio(16 / 9, contentMode: .fit)
+            .clipped()
+            .cornerRadius(12)
+        }
+        .buttonStyle(CustomButtonStyle())
+        .contextMenu {
+            Button("削除", systemImage: "trash", role: .destructive) {
+                deleteHistory(item)
+            }
+            Button("最初から再生", systemImage: "gobackward") {
+                playFromBeginning(item)
+            }
+        }
+    }
+
     func playFromBeginning(_ item: HistoryItem) {
         savePosition(key: item.key, seconds: 0)
 
@@ -25,6 +109,7 @@ extension ContentView {
         let saved = positions[item.key] ?? 0
         if let thumb = thumbnails[item.key] {
             Button {
+                playerController.pause()
                 selectedItem = item
             } label: {
                 thumb
@@ -90,7 +175,10 @@ extension ContentView {
                         historyCardInfo(item: item, saved: saved, total: total)
                     }
                 }
-                .onTapGesture { selectedItem = item }
+                .onTapGesture {
+                    playerController.pause()
+                    selectedItem = item
+                }
                 .contextMenu {
                     if item.key != selectedItem?.key {
                         Button("削除", systemImage: "trash", role: .destructive) {
@@ -109,6 +197,7 @@ extension ContentView {
         let saved = positions[item.key] ?? 0
 
         Button {
+            playerController.pause()
             selectedItem = item
         } label: {
             HStack(spacing: 10) {
@@ -152,7 +241,7 @@ extension ContentView {
                     Text("\(formatTime(saved)) / \(formatTime(total))")
                         .font(.system(.caption, design: .rounded))
                 } else {
-                    Text("\(Int(total / 60))分")
+                    Text(formatDuration(total))
                         .font(.system(.caption, design: .rounded))
                 }
             }

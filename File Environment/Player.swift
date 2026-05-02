@@ -52,6 +52,7 @@ final class PlayerController: ObservableObject {
 struct PlayerContainerView: View {
 
     let url: URL
+    let displayName: String
     let initialPosition: Double
     let onProgress: (Double) -> Void
     let onDuration: (Double) -> Void
@@ -61,6 +62,7 @@ struct PlayerContainerView: View {
     var body: some View {
         PlayerViewControllerRepresentable(
             url: url,
+            displayName: displayName,
             initialPosition: initialPosition,
             onProgress: onProgress,
             onDuration: onDuration,
@@ -74,6 +76,7 @@ struct PlayerContainerView: View {
 struct PlayerViewControllerRepresentable: UIViewControllerRepresentable {
 
     let url: URL
+    let displayName: String
     let initialPosition: Double
     let onProgress: (Double) -> Void
     let onDuration: (Double) -> Void
@@ -91,21 +94,22 @@ struct PlayerViewControllerRepresentable: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let vc = AVPlayerViewController()
-        
-        // AVPlayerViewController の標準コントロール（再生/シーク等）を表示しない
         vc.showsPlaybackControls = false
 
         let didStart = url.startAccessingSecurityScopedResource()
 
-        let player = AVPlayer(url: url)
-        vc.player = player
+        let item = AVPlayerItem(url: url)
+        let titleMeta = AVMutableMetadataItem()
+        titleMeta.identifier = .commonIdentifierTitle
+        titleMeta.value = displayName as NSString
+        titleMeta.extendedLanguageTag = "und"
+        item.externalMetadata = [titleMeta]
 
-        playerController.player = player
-        playerController.isPlaying = true
+        let player = AVPlayer(playerItem: item)
+        vc.player = player
 
         context.coordinator.scopedURL = url
         context.coordinator.didStartAccess = didStart
-
         context.coordinator.attach(to: player)
 
         if initialPosition > 0 {
@@ -113,6 +117,13 @@ struct PlayerViewControllerRepresentable: UIViewControllerRepresentable {
         }
 
         player.play()
+
+        // @Published の更新を現在のレイアウトサイクル完了後に行う。
+        // makeUIViewController 内で直接更新すると body の再評価が再入し
+        // AVPlayerViewController のウィンドウ管理が壊れることがある。
+        let ctrl = playerController
+        DispatchQueue.main.async { ctrl.player = player }
+
         return vc
     }
 
@@ -206,6 +217,7 @@ struct PlayerViewControllerRepresentable: UIViewControllerRepresentable {
         }
 
         deinit {
+            attachedPlayer?.pause()
             if let attachedPlayer, let obs = observer {
                 attachedPlayer.removeTimeObserver(obs)
             }

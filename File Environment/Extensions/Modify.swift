@@ -17,6 +17,15 @@ func formatTimestamp(_ seconds: Double) -> String {
                  : String(format: "%d:%02d", m, s)
 }
 
+/// 動画の長さを「N秒」または「M分」で表示。1分未満は秒、それ以上は分単位
+func formatDuration(_ seconds: Double) -> String {
+    let total = Int(seconds)
+    if total < 60 {
+        return String(localized: "\(total)秒")
+    }
+    return String(localized: "\(total / 60)分")
+}
+
 extension View {
     func modify<Content: View>(@ViewBuilder _ transform: (Self) -> Content) -> some View {
         transform(self)

@@ -31,6 +31,11 @@ struct ContentView: View {
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     @Environment(\.requestReview) private var requestReview
+    @Environment(\.openURL) private var openURL
+
+    /// App Store のレビュー作成ページ
+    private static let writeReviewURL =
+        URL(string: "https://apps.apple.com/app/id6779471160?action=write-review")!
 
     @State var thumbnails: [String: Image] = [:]
     @State var videoHistory: [HistoryItem] = []
@@ -90,6 +95,13 @@ struct ContentView: View {
                 bottomBar
             }
             .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        openURL(Self.writeReviewURL)
+                    } label: {
+                        Label("レビューを書く", systemImage: "star.bubble")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         isPaywallPresented = true

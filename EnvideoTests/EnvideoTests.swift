@@ -1,6 +1,6 @@
 import XCTest
 import AVFoundation
-@testable import File_Environment
+@testable import Envideo
 
 // MARK: - PlayerController Tests
 

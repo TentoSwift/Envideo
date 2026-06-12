@@ -89,6 +89,17 @@ struct ContentView: View {
             .ornament(visibility: .visible, attachmentAnchor: .scene(.bottom)) {
                 bottomBar
             }
+            .toolbar {
+                if !store.isPurchased {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            isPaywallPresented = true
+                        } label: {
+                            Label("Envideo Pro", systemImage: "crown")
+                        }
+                    }
+                }
+            }
             .onAppear {
                 loadHistory()
                 loadPositions()

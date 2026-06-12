@@ -1,6 +1,7 @@
 import SwiftUI
 import AVKit
 import PhotosUI
+import StoreKit
 import UniformTypeIdentifiers
 internal import Combine
 
@@ -29,6 +30,7 @@ struct ContentView: View {
 
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
+    @Environment(\.requestReview) private var requestReview
 
     @State var thumbnails: [String: Image] = [:]
     @State var videoHistory: [HistoryItem] = []
@@ -44,6 +46,7 @@ struct ContentView: View {
     @State var isYouTubeAddPresented = false
     @State var isYouTubeBrowserPresented = false
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @AppStorage("hasRequestedReview") private var hasRequestedReview = false
     @State private var isOnboardingPresented = false
     @State private var didSetupRemoteCommands = false
 
@@ -159,7 +162,17 @@ struct ContentView: View {
             OnboardingView(isPresented: $isOnboardingPresented)
                 .interactiveDismissDisabled()
         }
-        .fullScreenCover(isPresented: $isFullScreen) {
+        .fullScreenCover(isPresented: $isFullScreen, onDismiss: {
+            // 初回のプレイヤー終了(再生完了・手動クローズとも)でレビューを依頼
+            guard !hasRequestedReview else { return }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(1))
+                // ペイウォール表示(履歴上限)と重なる場合は依頼しない
+                guard !isPaywallPresented, !hasRequestedReview else { return }
+                hasRequestedReview = true
+                requestReview()
+            }
+        }) {
             if let item = selectedItem {
                 FullScreenPlayerWrapper(
                     item: item,

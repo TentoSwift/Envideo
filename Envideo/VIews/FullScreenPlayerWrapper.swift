@@ -40,6 +40,7 @@ struct FullScreenPlayerWrapper: View {
                 onProgress: onProgress,
                 onDuration: onDuration,
                 onSelect: onSelect,
+                onEnded: onEnded,
                 isPresented: $isPresented
             )
         }
@@ -57,10 +58,10 @@ struct YouTubeFullScreenView: View {
     let onProgress: (String, Double) -> Void
     let onDuration: (String, Double) -> Void
     let onSelect: (HistoryItem) -> Void
+    let onEnded: (String) -> Void
     @Binding var isPresented: Bool
 
     @State private var cinemaState = CinemaState.shared
-    @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -74,14 +75,8 @@ struct YouTubeFullScreenView: View {
                     onProgress: onProgress,
                     onDuration: onDuration,
                     onEnded: {
-                        // 位置を0にリセット保存して履歴に戻る
-                        onProgress(item.key, 0)
-                        Task { @MainActor in
-                            if cinemaState.isImmersiveOpen {
-                                await dismissImmersiveSpace()
-                            }
-                            isPresented = false
-                        }
+                        // 終了処理は ContentView 側に集約(位置リセット・クローズ・初回レビュー依頼)
+                        onEnded(item.key)
                     }
                 )
                 .ignoresSafeArea()

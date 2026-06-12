@@ -1,5 +1,6 @@
 import SwiftUI
 import AVKit
+import Photos
 
 extension ContentView {
 
@@ -9,6 +10,22 @@ extension ContentView {
             generateYouTubeThumbnail(for: item)
         case .local:
             generateLocalThumbnail(for: item)
+        case .photoLibrary:
+            generatePhotoLibraryThumbnail(for: item)
+        }
+    }
+
+    private func generatePhotoLibraryThumbnail(for item: HistoryItem) {
+        guard let assetID = item.photoAssetID else { return }
+        Task.detached {
+            let size = CGSize(width: 400, height: 400)
+            guard let uiImage = await PhotoLibraryAsset.thumbnail(
+                for: assetID, targetSize: size
+            ) else { return }
+            let image = Image(uiImage: uiImage)
+            await MainActor.run {
+                thumbnails[item.key] = image
+            }
         }
     }
 
@@ -72,6 +89,23 @@ extension ContentView {
             let name = pickedURL.deletingPathExtension().lastPathComponent
             let newItem = HistoryItem.local(bookmarkData: bookmark, displayName: name)
             await insertHistoryItem(newItem)
+        }
+    }
+
+    /// 写真ライブラリの動画を履歴に追加して再生開始
+    func addPhotoLibraryVideo(assetID: String) {
+        Task {
+            // PHAsset の取得・再生にはフォトライブラリの読み取り許可が必要
+            let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+            guard status == .authorized || status == .limited else { return }
+            let displayName: String
+            if let phAsset = PhotoLibraryAsset.asset(for: assetID) {
+                displayName = PhotoLibraryAsset.displayName(for: phAsset)
+            } else {
+                displayName = String(localized: "Video")
+            }
+            let item = HistoryItem.photoLibrary(assetID: assetID, displayName: displayName)
+            await insertHistoryItem(item)
         }
     }
 
@@ -175,6 +209,9 @@ extension ContentView {
                 case "youtube":
                     guard let yt = s.youtubeID else { return nil }
                     return HistoryItem.youtube(videoID: yt, title: s.displayName)
+                case "photoLibrary":
+                    guard let assetID = s.photoAssetID else { return nil }
+                    return HistoryItem.photoLibrary(assetID: assetID, displayName: s.displayName)
                 default:
                     guard let data = s.bookmarkData else { return nil }
                     return HistoryItem.local(bookmarkData: data, displayName: s.displayName)
@@ -199,6 +236,7 @@ extension ContentView {
                 kind: item.kind.rawValue,
                 bookmarkData: item.bookmarkData,
                 youtubeID: item.youtubeID,
+                photoAssetID: item.photoAssetID,
                 displayName: item.displayName
             )
         }

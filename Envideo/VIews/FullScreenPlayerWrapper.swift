@@ -11,13 +11,12 @@ struct FullScreenPlayerWrapper: View {
     let onProgress: (String, Double) -> Void
     let onDuration: (String, Double) -> Void
     let onSelect: (HistoryItem) -> Void
-    let onAdd: (URL) -> Void
     let onEnded: (String) -> Void
     @Binding var isPresented: Bool
 
     var body: some View {
         switch item.kind {
-        case .local:
+        case .local, .photoLibrary:
             FullScreenPlayerView(
                 item: item,
                 videoHistory: videoHistory,
@@ -28,7 +27,6 @@ struct FullScreenPlayerWrapper: View {
                 onProgress: onProgress,
                 onDuration: onDuration,
                 onSelect: onSelect,
-                onAdd: onAdd,
                 onEnded: onEnded,
                 isPresented: $isPresented
             )
@@ -117,8 +115,7 @@ struct YouTubeFullScreenView: View {
                                 positions: positions,
                                 durations: durations,
                                 selectedKey: item.key,
-                                onSelect: onSelect,
-                                onAddTapped: { /* not used here */ }
+                                onSelect: onSelect
                             )
                         }
                         .padding(.vertical, 16)

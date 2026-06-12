@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2D6748BE2FDBC5E900E6EE13 /* Envideo Pro.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 2D6748BD2FDBC5E900E6EE13 /* Envideo Pro.storekit */; };
 		2D8DA5AF2F485D0800707FC3 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; productRef = 2D8DA5AE2F485D0800707FC3 /* RealityKitContent */; };
 /* End PBXBuildFile section */
 
@@ -16,14 +17,15 @@
 			containerPortal = 2D8DA5A12F485D0800707FC3 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 2D8DA5A82F485D0800707FC3;
-			remoteInfo = "Envideo";
+			remoteInfo = Envideo;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2D8DA5A92F485D0800707FC3 /* Envideo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Envideo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D6748BD2FDBC5E900E6EE13 /* Envideo Pro.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Envideo Pro.storekit"; sourceTree = "<group>"; };
+		2D8DA5A92F485D0800707FC3 /* Envideo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Envideo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D8DA5AD2F485D0800707FC3 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
-		A1B2C3010000000000000001 /* EnvideoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EnvideoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3010000000000000001 /* EnvideoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EnvideoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -42,12 +44,12 @@
 			exceptions = (
 				2D8DA5C12F485D0900707FC3 /* Exceptions for "Envideo" folder in "Envideo" target */,
 			);
-			path = "Envideo";
+			path = Envideo;
 			sourceTree = "<group>";
 		};
 		A1B2C3020000000000000002 /* EnvideoTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "EnvideoTests";
+			path = EnvideoTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -74,6 +76,7 @@
 		2D8DA5A02F485D0800707FC3 = {
 			isa = PBXGroup;
 			children = (
+				2D6748BD2FDBC5E900E6EE13 /* Envideo Pro.storekit */,
 				2D8DA5AB2F485D0800707FC3 /* Envideo */,
 				A1B2C3020000000000000002 /* EnvideoTests */,
 				2D8DA5AC2F485D0800707FC3 /* Packages */,
@@ -116,11 +119,11 @@
 			fileSystemSynchronizedGroups = (
 				2D8DA5AB2F485D0800707FC3 /* Envideo */,
 			);
-			name = "Envideo";
+			name = Envideo;
 			packageProductDependencies = (
 				2D8DA5AE2F485D0800707FC3 /* RealityKitContent */,
 			);
-			productName = "Envideo";
+			productName = Envideo;
 			productReference = 2D8DA5A92F485D0800707FC3 /* Envideo.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -140,8 +143,8 @@
 			fileSystemSynchronizedGroups = (
 				A1B2C3020000000000000002 /* EnvideoTests */,
 			);
-			name = "EnvideoTests";
-			productName = "EnvideoTests";
+			name = EnvideoTests;
+			productName = EnvideoTests;
 			productReference = A1B2C3010000000000000001 /* EnvideoTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -226,6 +229,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2D6748BE2FDBC5E900E6EE13 /* Envideo Pro.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,7 +275,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = LV3H7Q68W6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -283,7 +287,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.envideo";
+				PRODUCT_BUNDLE_IDENTIFIER = com.tento.envideo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
@@ -304,7 +308,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = LV3H7Q68W6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -316,7 +320,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.envideo";
+				PRODUCT_BUNDLE_IDENTIFIER = com.tento.envideo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
@@ -460,7 +464,7 @@
 				DEVELOPMENT_TEAM = LV3H7Q68W6;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.envideo.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.tento.envideo.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = xros;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
@@ -483,7 +487,7 @@
 				DEVELOPMENT_TEAM = LV3H7Q68W6;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.envideo.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = com.tento.envideo.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = xros;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";

@@ -1,42 +1,33 @@
 import SwiftUI
 
 struct SeatPickerView: View {
-    @State private var state = CinemaState.shared
+    @Bindable private var state = CinemaState.shared
 
     var body: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 16) {
-                ForEach(CinemaPosition.allCases) { pos in
-                    Button {
-                        state.position = pos
-                    } label: {
-                        VStack(spacing: 8) {
-                            Image(systemName: pos.systemImage)
-                                .font(.system(size: 28))
-                            Text(pos.localizedTitle)
-                                .font(.callout)
-                                .fontWeight(.semibold)
-                        }
-                        .frame(width: 130, height: 100)
-                        .background {
-                            RoundedRectangle(cornerRadius: 18)
-                                .fill(state.position == pos
-                                      ? .white.opacity(0.25)
-                                      : .white.opacity(0.08))
-                        }
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 18)
-                                .strokeBorder(state.position == pos
-                                              ? .white
-                                              : .clear, lineWidth: 2)
-                        }
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("列")
+                    .font(.headline)
+                Picker("列", selection: $state.row) {
+                    ForEach(CinemaRow.allCases) { row in
+                        Text(row.localizedTitle).tag(row)
                     }
-                    .buttonStyle(.plain)
-                    .hoverEffect(.highlight)
                 }
+                .pickerStyle(.segmented)
             }
-            .padding(.horizontal, 24)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("高さ")
+                    .font(.headline)
+                Picker("高さ", selection: $state.tier) {
+                    ForEach(CinemaTier.allCases) { tier in
+                        Text(tier.localizedTitle).tag(tier)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
         }
-        .scrollIndicators(.hidden)
+        .frame(maxWidth: 640, alignment: .leading)
+        .padding(.horizontal, 24)
     }
 }

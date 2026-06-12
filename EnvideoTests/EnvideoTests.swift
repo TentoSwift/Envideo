@@ -90,35 +90,49 @@ final class PlayerControllerTests: XCTestCase {
 final class HistoryItemTests: XCTestCase {
 
     func testInvalidBookmarkDataProducesNilURL() {
-        let item = HistoryItem(id: "x", key: "x", bookmarkData: Data(), displayName: "Test")
+        let item = HistoryItem.local(bookmarkData: Data(), displayName: "Test")
         XCTAssertNil(item.url)
     }
 
     func testDisplayNameIsStored() {
-        let item = HistoryItem(id: "a", key: "a", bookmarkData: Data(), displayName: "My Video")
+        let item = HistoryItem.local(bookmarkData: Data(), displayName: "My Video")
         XCTAssertEqual(item.displayName, "My Video")
     }
 
     func testEqualityBasedOnAllStoredProperties() {
         let data = Data([0x01, 0x02, 0x03])
-        let item1 = HistoryItem(id: "abc", key: "abc", bookmarkData: data, displayName: "A")
-        let item2 = HistoryItem(id: "abc", key: "abc", bookmarkData: data, displayName: "A")
+        let item1 = HistoryItem.local(bookmarkData: data, displayName: "A")
+        let item2 = HistoryItem.local(bookmarkData: data, displayName: "A")
         XCTAssertEqual(item1, item2)
     }
 
     func testInequalityForDifferentKeys() {
-        let item1 = HistoryItem(id: "a", key: "a", bookmarkData: Data([0x01]), displayName: "A")
-        let item2 = HistoryItem(id: "b", key: "b", bookmarkData: Data([0x02]), displayName: "B")
+        let item1 = HistoryItem.local(bookmarkData: Data([0x01]), displayName: "A")
+        let item2 = HistoryItem.local(bookmarkData: Data([0x02]), displayName: "B")
         XCTAssertNotEqual(item1, item2)
     }
 
     func testHashableConsistency() {
         let data = Data([0xFF, 0xAA])
-        let item = HistoryItem(id: "z", key: "z", bookmarkData: data, displayName: "Z")
+        let item = HistoryItem.local(bookmarkData: data, displayName: "Z")
         var set = Set<HistoryItem>()
         set.insert(item)
         set.insert(item)
         XCTAssertEqual(set.count, 1)
+    }
+
+    func testYouTubeFactorySetsKindAndKey() {
+        let item = HistoryItem.youtube(videoID: "abc123XYZ_-", title: "T")
+        XCTAssertEqual(item.kind, .youtube)
+        XCTAssertEqual(item.key, "yt:abc123XYZ_-")
+        XCTAssertEqual(item.youtubeID, "abc123XYZ_-")
+    }
+
+    func testPhotoLibraryFactorySetsKindAndKey() {
+        let item = HistoryItem.photoLibrary(assetID: "ASSET-1", displayName: "P")
+        XCTAssertEqual(item.kind, .photoLibrary)
+        XCTAssertEqual(item.key, "ph:ASSET-1")
+        XCTAssertEqual(item.photoAssetID, "ASSET-1")
     }
 }
 

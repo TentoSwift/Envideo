@@ -80,24 +80,25 @@ struct YouTubeAddView: View {
                         .foregroundStyle(.red)
                 }
 
-                Button {
-                    tryAdd()
-                } label: {
-                    Text("追加")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(input.isEmpty)
-                .padding(.horizontal, 40)
-
                 Spacer()
             }
             .padding()
             .navigationTitle("YouTubeを追加")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("閉じる") { isPresented = false }
+                    Button {
+                        isPresented = false
+                    } label: {
+                        Label("閉じる", systemImage: "xmark")
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        tryAdd()
+                    } label: {
+                        Label("追加", systemImage: "checkmark")
+                    }
+                    .disabled(input.isEmpty)
                 }
             }
         }

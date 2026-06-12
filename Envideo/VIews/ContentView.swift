@@ -162,7 +162,17 @@ struct ContentView: View {
             OnboardingView(isPresented: $isOnboardingPresented)
                 .interactiveDismissDisabled()
         }
-        .fullScreenCover(isPresented: $isFullScreen) {
+        .fullScreenCover(isPresented: $isFullScreen, onDismiss: {
+            // 初回のプレイヤー終了(再生完了・手動クローズとも)でレビューを依頼
+            guard !hasRequestedReview else { return }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(1))
+                // ペイウォール表示(履歴上限)と重なる場合は依頼しない
+                guard !isPaywallPresented, !hasRequestedReview else { return }
+                hasRequestedReview = true
+                requestReview()
+            }
+        }) {
             if let item = selectedItem {
                 FullScreenPlayerWrapper(
                     item: item,
@@ -181,12 +191,6 @@ struct ContentView: View {
                                 await dismissImmersiveSpace()
                             }
                             isFullScreen = false
-                            // 初回の再生完了でレビューを依頼(以後は表示しない)
-                            if !hasRequestedReview {
-                                hasRequestedReview = true
-                                try? await Task.sleep(for: .seconds(1))
-                                requestReview()
-                            }
                         }
                     },
                     isPresented: $isFullScreen

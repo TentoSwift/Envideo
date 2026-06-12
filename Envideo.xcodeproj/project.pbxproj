@@ -16,38 +16,38 @@
 			containerPortal = 2D8DA5A12F485D0800707FC3 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 2D8DA5A82F485D0800707FC3;
-			remoteInfo = "File Environment";
+			remoteInfo = "Envideo";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2D8DA5A92F485D0800707FC3 /* File Environment.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "File Environment.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D8DA5A92F485D0800707FC3 /* Envideo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Envideo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D8DA5AD2F485D0800707FC3 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
-		A1B2C3010000000000000001 /* File Environment Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "File Environment Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3010000000000000001 /* EnvideoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EnvideoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		2D8DA5C12F485D0900707FC3 /* Exceptions for "File Environment" folder in "File Environment" target */ = {
+		2D8DA5C12F485D0900707FC3 /* Exceptions for "Envideo" folder in "Envideo" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 2D8DA5A82F485D0800707FC3 /* File Environment */;
+			target = 2D8DA5A82F485D0800707FC3 /* Envideo */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2D8DA5AB2F485D0800707FC3 /* File Environment */ = {
+		2D8DA5AB2F485D0800707FC3 /* Envideo */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				2D8DA5C12F485D0900707FC3 /* Exceptions for "File Environment" folder in "File Environment" target */,
+				2D8DA5C12F485D0900707FC3 /* Exceptions for "Envideo" folder in "Envideo" target */,
 			);
-			path = "File Environment";
+			path = "Envideo";
 			sourceTree = "<group>";
 		};
-		A1B2C3020000000000000002 /* File Environment Tests */ = {
+		A1B2C3020000000000000002 /* EnvideoTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "File Environment Tests";
+			path = "EnvideoTests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -74,8 +74,8 @@
 		2D8DA5A02F485D0800707FC3 = {
 			isa = PBXGroup;
 			children = (
-				2D8DA5AB2F485D0800707FC3 /* File Environment */,
-				A1B2C3020000000000000002 /* File Environment Tests */,
+				2D8DA5AB2F485D0800707FC3 /* Envideo */,
+				A1B2C3020000000000000002 /* EnvideoTests */,
 				2D8DA5AC2F485D0800707FC3 /* Packages */,
 				2D8DA5AA2F485D0800707FC3 /* Products */,
 			);
@@ -84,8 +84,8 @@
 		2D8DA5AA2F485D0800707FC3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2D8DA5A92F485D0800707FC3 /* File Environment.app */,
-				A1B2C3010000000000000001 /* File Environment Tests.xctest */,
+				2D8DA5A92F485D0800707FC3 /* Envideo.app */,
+				A1B2C3010000000000000001 /* EnvideoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -101,9 +101,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2D8DA5A82F485D0800707FC3 /* File Environment */ = {
+		2D8DA5A82F485D0800707FC3 /* Envideo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2D8DA5C22F485D0900707FC3 /* Build configuration list for PBXNativeTarget "File Environment" */;
+			buildConfigurationList = 2D8DA5C22F485D0900707FC3 /* Build configuration list for PBXNativeTarget "Envideo" */;
 			buildPhases = (
 				2D8DA5A52F485D0800707FC3 /* Sources */,
 				2D8DA5A62F485D0800707FC3 /* Frameworks */,
@@ -114,19 +114,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				2D8DA5AB2F485D0800707FC3 /* File Environment */,
+				2D8DA5AB2F485D0800707FC3 /* Envideo */,
 			);
-			name = "File Environment";
+			name = "Envideo";
 			packageProductDependencies = (
 				2D8DA5AE2F485D0800707FC3 /* RealityKitContent */,
 			);
-			productName = "File Environment";
-			productReference = 2D8DA5A92F485D0800707FC3 /* File Environment.app */;
+			productName = "Envideo";
+			productReference = 2D8DA5A92F485D0800707FC3 /* Envideo.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A1B2C3030000000000000003 /* File Environment Tests */ = {
+		A1B2C3030000000000000003 /* EnvideoTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A1B2C3090000000000000009 /* Build configuration list for PBXNativeTarget "File Environment Tests" */;
+			buildConfigurationList = A1B2C3090000000000000009 /* Build configuration list for PBXNativeTarget "EnvideoTests" */;
 			buildPhases = (
 				A1B2C3040000000000000004 /* Sources */,
 				A1B2C3050000000000000005 /* Frameworks */,
@@ -138,11 +138,11 @@
 				A1B2C30B000000000000000B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				A1B2C3020000000000000002 /* File Environment Tests */,
+				A1B2C3020000000000000002 /* EnvideoTests */,
 			);
-			name = "File Environment Tests";
-			productName = "File Environment Tests";
-			productReference = A1B2C3010000000000000001 /* File Environment Tests.xctest */;
+			name = "EnvideoTests";
+			productName = "EnvideoTests";
+			productReference = A1B2C3010000000000000001 /* EnvideoTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -164,7 +164,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 2D8DA5A42F485D0800707FC3 /* Build configuration list for PBXProject "File Environment" */;
+			buildConfigurationList = 2D8DA5A42F485D0800707FC3 /* Build configuration list for PBXProject "Envideo" */;
 			developmentRegion = ja;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -215,8 +215,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2D8DA5A82F485D0800707FC3 /* File Environment */,
-				A1B2C3030000000000000003 /* File Environment Tests */,
+				2D8DA5A82F485D0800707FC3 /* Envideo */,
+				A1B2C3030000000000000003 /* EnvideoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,7 +258,7 @@
 /* Begin PBXTargetDependency section */
 		A1B2C30B000000000000000B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2D8DA5A82F485D0800707FC3 /* File Environment */;
+			target = 2D8DA5A82F485D0800707FC3 /* Envideo */;
 			targetProxy = A1B2C30A000000000000000A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -283,7 +283,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.File-Environment";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.envideo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
@@ -316,7 +316,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.File-Environment";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.envideo";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
@@ -460,7 +460,7 @@
 				DEVELOPMENT_TEAM = LV3H7Q68W6;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.File-Environment-Tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.envideo.tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = xros;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
@@ -469,7 +469,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 7;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/File Environment.app/File Environment";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Envideo.app/Envideo";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
@@ -483,7 +483,7 @@
 				DEVELOPMENT_TEAM = LV3H7Q68W6;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.File-Environment-Tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.tento.envideo.tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = xros;
 				SUPPORTED_PLATFORMS = "xros xrsimulator";
@@ -492,7 +492,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 7;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/File Environment.app/File Environment";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Envideo.app/Envideo";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
@@ -500,7 +500,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2D8DA5A42F485D0800707FC3 /* Build configuration list for PBXProject "File Environment" */ = {
+		2D8DA5A42F485D0800707FC3 /* Build configuration list for PBXProject "Envideo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2D8DA5C52F485D0900707FC3 /* Debug */,
@@ -509,7 +509,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		2D8DA5C22F485D0900707FC3 /* Build configuration list for PBXNativeTarget "File Environment" */ = {
+		2D8DA5C22F485D0900707FC3 /* Build configuration list for PBXNativeTarget "Envideo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2D8DA5C32F485D0900707FC3 /* Debug */,
@@ -518,7 +518,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A1B2C3090000000000000009 /* Build configuration list for PBXNativeTarget "File Environment Tests" */ = {
+		A1B2C3090000000000000009 /* Build configuration list for PBXNativeTarget "EnvideoTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A1B2C3070000000000000007 /* Debug */,

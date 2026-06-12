@@ -30,15 +30,15 @@ Apple Vision Pro 向けのイマーシブ動画プレイヤー。ローカルの
 
 - visionOS 26.0 以降（Apple Vision Pro）
 - Xcode（visionOS 26.2 SDK 推奨）
-- Bundle Identifier: `com.tento.File-Environment`
+- Bundle Identifier: `com.tento.envideo`
 
 ## ビルド
 
 ```sh
-open "File Environment.xcodeproj"
+open Envideo.xcodeproj
 ```
 
-ターゲット `File Environment` を visionOS シミュレータまたは実機で実行。
+ターゲット `Envideo` を visionOS シミュレータまたは実機で実行。
 
 ## スクリーンショット
 
@@ -50,8 +50,8 @@ open "File Environment.xcodeproj"
 
 ```
 Envideo/
-├── File Environment/
-│   ├── File_EnvironmentApp.swift   # @main / Scene 定義
+├── Envideo/
+│   ├── EnvideoApp.swift            # @main / Scene 定義
 │   ├── Player.swift                # AVPlayer 制御
 │   ├── StoreManager.swift          # StoreKit 課金管理
 │   ├── HistoryItem.swift           # 履歴データモデル

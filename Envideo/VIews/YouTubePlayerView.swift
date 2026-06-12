@@ -27,7 +27,7 @@ struct YouTubePlayerView: UIViewRepresentable {
         webView.isOpaque = false
 
         let html = makeHTML(videoID: videoID, initialPosition: initialPosition)
-        let bundleID = Bundle.main.bundleIdentifier ?? "com.tento.File-Environment"
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.tento.envideo"
         webView.loadHTMLString(html, baseURL: URL(string: "https://\(bundleID)"))
         return webView
     }

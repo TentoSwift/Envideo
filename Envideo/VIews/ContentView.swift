@@ -1,5 +1,6 @@
 import SwiftUI
 import AVKit
+import PhotosUI
 import UniformTypeIdentifiers
 internal import Combine
 
@@ -36,6 +37,8 @@ struct ContentView: View {
 
     @State var selectedItem: HistoryItem? = nil
     @State var isImporterPresented = false
+    @State var isPhotosPickerPresented = false
+    @State var pickedPhotosItem: PhotosPickerItem? = nil
     @State var isPaywallPresented = false
     @State var isFullScreen = false
     @State var isYouTubeAddPresented = false
@@ -55,9 +58,7 @@ struct ContentView: View {
                         Text("動画がありません")
                             .font(.title2)
                             .foregroundStyle(.secondary)
-                        Button {
-                            isImporterPresented.toggle()
-                        } label: {
+                        addVideoMenu {
                             Label("動画を追加", systemImage: "plus")
                                 .padding(.horizontal, 24)
                                 .padding(.vertical, 12)
@@ -124,6 +125,20 @@ struct ContentView: View {
                     addToHistoryAndSelect(url)
                 }
             }
+            .photosPicker(
+                isPresented: $isPhotosPickerPresented,
+                selection: $pickedPhotosItem,
+                matching: .videos,
+                preferredItemEncoding: .current,
+                photoLibrary: .shared()
+            )
+            .onChange(of: pickedPhotosItem) { _, newItem in
+                guard let newItem else { return }
+                if let identifier = newItem.itemIdentifier {
+                    addPhotoLibraryVideo(assetID: identifier)
+                }
+                pickedPhotosItem = nil
+            }
         }
         .sheet(isPresented: $isPaywallPresented) {
             PaywallView().environment(store)
@@ -156,7 +171,6 @@ struct ContentView: View {
                     onProgress: { savePosition(key: $0, seconds: $1) },
                     onDuration: { saveDuration(key: $0, seconds: $1) },
                     onSelect: { selectedItem = $0 },
-                    onAdd: { addToHistoryAndSelect($0) },
                     onEnded: { _ in
                         savePosition(key: item.key, seconds: 0)
                         Task { @MainActor in
@@ -191,11 +205,27 @@ struct ContentView: View {
     // MARK: - Bottom ornament
 
     @ViewBuilder
+    func addVideoMenu<LabelContent: View>(@ViewBuilder label: () -> LabelContent) -> some View {
+        Menu {
+            Button {
+                isImporterPresented = true
+            } label: {
+                Label("ファイルから", systemImage: "folder")
+            }
+            Button {
+                isPhotosPickerPresented = true
+            } label: {
+                Label("写真から", systemImage: "photo.on.rectangle")
+            }
+        } label: {
+            label()
+        }
+    }
+
+    @ViewBuilder
     private var bottomBar: some View {
         HStack(spacing: 4) {
-            Button {
-                isImporterPresented.toggle()
-            } label: {
+            addVideoMenu {
                 Label("動画を追加", systemImage: "plus")
                     .font(.system(size: 18, weight: .semibold))
                     .padding(.horizontal, 20)

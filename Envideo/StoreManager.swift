@@ -4,7 +4,7 @@ import Observation
 @Observable
 @MainActor
 final class StoreManager {
-    static let productID = "com.ishinotento.FileEnvironment.unlock"
+    static let productID = "com.tento.envideo.pro"
     static let historyLimit = 3
 
     private(set) var isPurchased = false

@@ -9,31 +9,49 @@ enum ImmersiveIDs {
 
 // MARK: - 視聴位置
 
-enum CinemaPosition: String, CaseIterable, Identifiable, Hashable {
-    case frontCenter
-    case middleCenter
+enum CinemaRow: String, CaseIterable, Identifiable, Hashable {
+    case front
+    case middle
+    case back
 
     var id: String { rawValue }
 
     var localizedTitle: LocalizedStringKey {
         switch self {
-        case .frontCenter:  return "最前列"
-        case .middleCenter: return "中段・中央"
+        case .front:  return "前列"
+        case .middle: return "中列"
+        case .back:   return "後列"
         }
     }
 
-    var systemImage: String {
+    /// +z: シーンが手前に来る = スクリーンに近づく
+    var zOffset: Float {
         switch self {
-        case .frontCenter:  return "rectangle.inset.bottomleading.filled"
-        case .middleCenter: return "rectangle.center.inset.filled"
+        case .front:  return 6
+        case .middle: return 0    // デフォルト位置
+        case .back:   return -5
+        }
+    }
+}
+
+enum CinemaTier: String, CaseIterable, Identifiable, Hashable {
+    case floor
+    case balcony
+
+    var id: String { rawValue }
+
+    var localizedTitle: LocalizedStringKey {
+        switch self {
+        case .floor:   return "1階席"
+        case .balcony: return "バルコニー席"
         }
     }
 
-    /// シーンを動かす量(ユーザーがそこに座っているように見せる平行移動)
-    var sceneOffset: SIMD3<Float> {
+    /// -y: シーンが下がる = 座席が高くなる
+    var yOffset: Float {
         switch self {
-        case .frontCenter:  return SIMD3( 0,  0,  6)   // 6m前進(画面に近づく)
-        case .middleCenter: return SIMD3( 0,  0,  0)   // デフォルト位置
+        case .floor:   return -0.8
+        case .balcony: return -2.5
         }
     }
 }
@@ -44,9 +62,34 @@ enum CinemaPosition: String, CaseIterable, Identifiable, Hashable {
 @Observable
 final class CinemaState {
     static let shared = CinemaState()
-    var position: CinemaPosition = .middleCenter
+
+    private static let rowKey = "seatRow"
+    private static let tierKey = "seatTier"
+
+    var row: CinemaRow = .middle {
+        didSet { UserDefaults.standard.set(row.rawValue, forKey: Self.rowKey) }
+    }
+    var tier: CinemaTier = .floor {
+        didSet { UserDefaults.standard.set(tier.rawValue, forKey: Self.tierKey) }
+    }
     var isImmersiveOpen: Bool = false
-    private init() {}
+
+    /// シーン全体を動かす量(ユーザーがその座席に座っているように見せる平行移動)
+    /// 部屋とスクリーンが一緒に動くので位置関係は常に保たれる。
+    var sceneOffset: SIMD3<Float> {
+        SIMD3(0, tier.yOffset, row.zOffset)
+    }
+
+    private init() {
+        if let raw = UserDefaults.standard.string(forKey: Self.rowKey),
+           let saved = CinemaRow(rawValue: raw) {
+            row = saved
+        }
+        if let raw = UserDefaults.standard.string(forKey: Self.tierKey),
+           let saved = CinemaTier(rawValue: raw) {
+            tier = saved
+        }
+    }
 }
 
 extension Notification.Name {
@@ -58,9 +101,6 @@ extension Notification.Name {
 struct CinemaImmersiveView: View {
     @State private var state = CinemaState.shared
 
-    /// CinemaScene.usdaのVideo_Dockの初期位置(0, 5.5, -14)
-    private static let videoDockOriginalPosition = SIMD3<Float>(0, 5.5, -14)
-
     var body: some View {
         RealityView { content in
             guard let scene = try? await Entity(named: "CinemaScene",
@@ -70,11 +110,11 @@ struct CinemaImmersiveView: View {
             scene.name = "LoadedCinema"
             CinemaImmersiveView.applyUnlit(to: scene)
             content.add(scene)
-            // 初期: Video_Dockだけ位置調整(部屋は固定)
-            CinemaImmersiveView.applyDockOffset(in: scene, offset: state.position.sceneOffset)
+            // 初期座席: 部屋とスクリーンを丸ごと平行移動(瞬間移動なのでVR酔いしない)
+            scene.position = state.sceneOffset
         } update: { content in
             for entity in content.entities where entity.name == "LoadedCinema" {
-                CinemaImmersiveView.applyDockOffset(in: entity, offset: state.position.sceneOffset)
+                entity.position = state.sceneOffset
             }
         }
         .onAppear {
@@ -85,11 +125,6 @@ struct CinemaImmersiveView: View {
             CinemaState.shared.isImmersiveOpen = false
             NotificationCenter.default.post(name: .cinemaImmersiveStateChanged, object: nil)
         }
-    }
-
-    private static func applyDockOffset(in scene: Entity, offset: SIMD3<Float>) {
-        guard let dock = scene.findEntity(named: "Video_Dock") else { return }
-        dock.position = videoDockOriginalPosition + offset
     }
 
     private static func applyUnlit(to entity: Entity) {
@@ -112,16 +147,34 @@ struct CinemaImmersiveView: View {
     }
 }
 
-// MARK: - DestinationVideo Studio (Apple純正)
+// MARK: - スタジオ(暗転空間 + 可動スクリーン)
 
 struct StudioImmersiveView: View {
+    @State private var state = CinemaState.shared
+
     var body: some View {
         RealityView { content in
-            guard let scene = try? await Entity(named: "AAA_MainScene",
+            // ドッキング領域だけの軽量シーン。部屋は無く、暗転空間にスクリーンが浮かぶ
+            guard let scene = try? await Entity(named: "StudioScene",
                                                 in: realityKitContentBundle) else {
                 return
             }
+            scene.name = "LoadedStudio"
             content.add(scene)
+            // シネマと同じ方式: シーン全体を平行移動して座席位置を表現
+            scene.position = state.sceneOffset
+        } update: { content in
+            for entity in content.entities where entity.name == "LoadedStudio" {
+                entity.position = state.sceneOffset
+            }
+        }
+        .onAppear {
+            CinemaState.shared.isImmersiveOpen = true
+            NotificationCenter.default.post(name: .cinemaImmersiveStateChanged, object: nil)
+        }
+        .onDisappear {
+            CinemaState.shared.isImmersiveOpen = false
+            NotificationCenter.default.post(name: .cinemaImmersiveStateChanged, object: nil)
         }
     }
 }

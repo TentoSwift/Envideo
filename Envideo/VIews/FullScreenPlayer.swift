@@ -1,19 +1,5 @@
 import SwiftUI
 import AVKit
-import UniformTypeIdentifiers
-
-// MARK: - Document picker helper
-
-private final class DocumentPickerHelper: NSObject, UIDocumentPickerDelegate {
-    let onPick: (URL) -> Void
-    init(onPick: @escaping (URL) -> Void) { self.onPick = onPick }
-
-    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        guard let url = urls.first else { return }
-        onPick(url)
-    }
-    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {}
-}
 
 // MARK: - Up Next
 
@@ -24,16 +10,10 @@ struct UpNextView: View {
     let durations: [String: Double]
     let selectedKey: String?
     let onSelect: (HistoryItem) -> Void
-    let onAddTapped: () -> Void
 
     var body: some View {
         ScrollView(.horizontal) {
             HStack(spacing: 20) {
-                Button { onAddTapped() } label: {
-                    AddVideoCard()
-                }
-                .buttonStyle(CustomButtonStyle())
-
                 ForEach(videoHistory) { item in
                     Button { onSelect(item) } label: {
                         UpNextCardView(
@@ -53,24 +33,6 @@ struct UpNextView: View {
         .contentMargins(.horizontal, 20)
         .scrollTargetBehavior(.viewAligned)
         .scrollInputBehavior(.enabled, for: .look)
-    }
-}
-
-struct AddVideoCard: View {
-    var body: some View {
-        ZStack {
-            Rectangle().fill(.gray.opacity(0.18))
-            VStack(spacing: 10) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 38))
-                Text("動画を追加")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-            }
-            .foregroundStyle(.secondary)
-        }
-        .frame(width: 290.4, height: 163.35)
-        .cornerRadius(15)
     }
 }
 
@@ -137,7 +99,6 @@ struct FullScreenPlayerView: UIViewControllerRepresentable {
     let onProgress: (String, Double) -> Void
     let onDuration: (String, Double) -> Void
     let onSelect: (HistoryItem) -> Void
-    let onAdd: (URL) -> Void
     let onEnded: (String) -> Void
     @Binding var isPresented: Bool
 
@@ -146,7 +107,6 @@ struct FullScreenPlayerView: UIViewControllerRepresentable {
             playerController: playerController,
             onProgress: onProgress,
             onDuration: onDuration,
-            onAdd: onAdd,
             onEnded: onEnded
         )
     }
@@ -175,8 +135,7 @@ struct FullScreenPlayerView: UIViewControllerRepresentable {
         let upNext = UpNextView(
             videoHistory: videoHistory, thumbnails: thumbnails,
             positions: positions, durations: durations,
-            selectedKey: item.key, onSelect: onSelect,
-            onAddTapped: { coordinator.presentFilePicker(from: vc) }
+            selectedKey: item.key, onSelect: onSelect
         )
         let inImmersive = CinemaState.shared.isImmersiveOpen
         let seatPicker = SeatPickerView()
@@ -214,7 +173,6 @@ struct FullScreenPlayerView: UIViewControllerRepresentable {
         let playerController: PlayerController
         let onProgress: (String, Double) -> Void
         let onDuration: (String, Double) -> Void
-        let onAdd: (URL) -> Void
         let onEnded: (String) -> Void
         var currentKey: String?
 
@@ -225,7 +183,6 @@ struct FullScreenPlayerView: UIViewControllerRepresentable {
         private var immersiveStateToken: NSObjectProtocol?
         private var scopedURL: URL?
         private var didStartAccess = false
-        private var documentPickerHelper: DocumentPickerHelper?
 
         func observeImmersiveState(vc: AVPlayerViewController, onChange: @escaping () -> Void) {
             if let token = immersiveStateToken {
@@ -240,36 +197,48 @@ struct FullScreenPlayerView: UIViewControllerRepresentable {
         init(playerController: PlayerController,
              onProgress: @escaping (String, Double) -> Void,
              onDuration: @escaping (String, Double) -> Void,
-             onAdd: @escaping (URL) -> Void,
              onEnded: @escaping (String) -> Void) {
             self.playerController = playerController
             self.onProgress = onProgress
             self.onDuration = onDuration
-            self.onAdd = onAdd
             self.onEnded = onEnded
-        }
-
-        func presentFilePicker(from vc: AVPlayerViewController) {
-            let helper = DocumentPickerHelper { [weak self] url in
-                self?.onAdd(url)
-                self?.documentPickerHelper = nil
-            }
-            documentPickerHelper = helper
-            let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.movie])
-            picker.delegate = helper
-            picker.allowsMultipleSelection = false
-            vc.present(picker, animated: true)
         }
 
         func load(item: HistoryItem, initialPosition: Double, into vc: AVPlayerViewController) {
             tearDown()
-            guard let url = item.url else { return }
-
             currentKey = item.key
-            didStartAccess = url.startAccessingSecurityScopedResource()
-            scopedURL = url
 
-            let avItem = AVPlayerItem(url: url)
+            switch item.kind {
+            case .local:
+                guard let url = item.url else { return }
+                didStartAccess = url.startAccessingSecurityScopedResource()
+                scopedURL = url
+                let avItem = AVPlayerItem(url: url)
+                configurePlayer(with: avItem, item: item, initialPosition: initialPosition, into: vc)
+
+            case .photoLibrary:
+                guard let assetID = item.photoAssetID else { return }
+                let loadingKey = item.key
+                Task { @MainActor in
+                    guard let avAsset = await PhotoLibraryAsset.avAsset(for: assetID) else { return }
+                    // ロード中に別動画へ切り替わった場合は破棄
+                    guard self.currentKey == loadingKey else { return }
+                    let avItem = AVPlayerItem(asset: avAsset)
+                    self.configurePlayer(with: avItem, item: item, initialPosition: initialPosition, into: vc)
+                }
+
+            case .youtube:
+                // YouTube は YouTubeFullScreenView 側で扱う想定なのでここでは何もしない
+                break
+            }
+        }
+
+        private func configurePlayer(
+            with avItem: AVPlayerItem,
+            item: HistoryItem,
+            initialPosition: Double,
+            into vc: AVPlayerViewController
+        ) {
             let meta = AVMutableMetadataItem()
             meta.identifier = .commonIdentifierTitle
             meta.value = item.displayName as NSString

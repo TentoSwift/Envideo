@@ -1,0 +1,34 @@
+{
+  "identifier" : "D7BA5CBF-94E5-4B8C-8D2E-9B2B22C2A11B",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "1000",
+      "familyShareable" : false,
+      "internalID" : "857F7E26-5FDA-4462-A93E-EF2BC16F3EF3",
+      "localizations" : [
+        {
+          "description" : "履歴を無制限に追加できます",
+          "displayName" : "無制限アンロック",
+          "locale" : "ja"
+        }
+      ],
+      "productID" : "com.tento.envideo.pro",
+      "referenceName" : "Envideo Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_locale" : "ja_JP",
+    "_storefront" : "JPN"
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "NSPhotoLibraryUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُستخدم لتشغيل مقاطع الفيديو من مكتبة الصور في مشهد السينما."
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S'utilitza per reproduir vídeos de la teva fototeca a l'escena del cinema."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slouží k přehrávání videí z knihovny fotografií v kinosále."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bruges til at afspille videoer fra dit fotobibliotek i biografscenen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird verwendet, um Videos aus deiner Fotomediathek in der Kinoszene abzuspielen."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Χρησιμοποιείται για αναπαραγωγή βίντεο από τη βιβλιοθήκη φωτογραφιών στη σκηνή του σινεμά."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used to play videos from your photo library in the cinema scene."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se usa para reproducir vídeos de tu fototeca en la escena de cine."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se usa para reproducir videos de tu fototeca en la escena de cine."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käytetään kuvakirjastosi videoiden toistamiseen elokuvateatterissa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisé pour lire les vidéos de votre photothèque dans la scène de cinéma."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisé pour lire les vidéos de votre photothèque dans la scène de cinéma."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משמש להפעלת סרטונים מספריית התמונות בסצנת הקולנוע."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपकी फ़ोटो लाइब्रेरी के वीडियो सिनेमा दृश्य में चलाने के लिए उपयोग किया जाता है।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koristi se za reprodukciju videozapisa iz biblioteke fotografija u kinu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A fotókönyvtárad videóinak lejátszásához a moziteremben."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digunakan untuk memutar video dari perpustakaan foto Anda di adegan bioskop."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consente di riprodurre i video della libreria foto nella scena del cinema."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写真ライブラリ内の動画を映画館シーンで再生するために使用します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사진 보관함의 동영상을 영화관 장면에서 재생하는 데 사용됩니다."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digunakan untuk memainkan video daripada pustaka foto anda dalam adegan pawagam."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brukes til å spille av videoer fra fotobiblioteket ditt i kinoscenen."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wordt gebruikt om video's uit je fotobibliotheek af te spelen in de bioscoopscène."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Służy do odtwarzania filmów z biblioteki zdjęć w scenie kinowej."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usado para reproduzir vídeos da sua fototeca na cena do cinema."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilizado para reproduzir vídeos da sua fototeca na cena do cinema."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folosit pentru a reda videoclipuri din biblioteca foto în scena de cinema."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Используется для воспроизведения видео из вашей медиатеки в сцене кинотеатра."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slúži na prehrávanie videí z knižnice fotografií v kinosále."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Används för att spela upp videor från ditt bildbibliotek i biografscenen."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ใช้เพื่อเล่นวิดีโอจากคลังรูปภาพของคุณในฉากโรงภาพยนตร์"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto arşivinizdeki videoları sinema sahnesinde oynatmak için kullanılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Використовується для відтворення відео з вашої медіатеки в сцені кінотеатру."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dùng để phát video từ thư viện ảnh của bạn trong khung cảnh rạp chiếu phim."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用于在电影院场景中播放照片图库中的视频。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用於在電影院場景中播放照片圖庫中的影片。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

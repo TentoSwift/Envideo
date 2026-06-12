@@ -32,6 +32,19 @@ final class StoreManager {
         await refresh()
     }
 
+    /// ProductView (.onInAppPurchaseCompletion) からの購入結果を処理する。
+    /// ProductView の購入は Transaction.updates に流れないため、ここで即時反映する
+    func handle(purchaseResult: Product.PurchaseResult) async {
+        switch purchaseResult {
+        case .success(let verification):
+            await handle(verification)
+        case .pending, .userCancelled:
+            break
+        @unknown default:
+            break
+        }
+    }
+
     private func handle(_ result: VerificationResult<Transaction>) async {
         guard case .verified(let tx) = result else { return }
         if tx.productID == Self.productID && tx.revocationDate == nil {

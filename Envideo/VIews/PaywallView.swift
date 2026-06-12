@@ -67,6 +67,12 @@ struct PaywallView: View {
             }
         }
         .frame(minWidth: 420, minHeight: 500)
+        .onInAppPurchaseCompletion { _, result in
+            // ProductView の購入結果を即時反映する(再起動待ちにしない)
+            if case .success(let purchaseResult) = result {
+                await store.handle(purchaseResult: purchaseResult)
+            }
+        }
         .onChange(of: store.isPurchased) { _, purchased in
             if purchased { dismiss() }
         }

@@ -10,32 +10,50 @@ struct PaywallView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                Image(systemName: "film.stack.fill")
-                    .font(.system(size: 72))
-                    .foregroundStyle(.tint)
-                    .padding(.bottom, 28)
+                if store.isPurchased {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 72))
+                        .foregroundStyle(.tint)
+                        .padding(.bottom, 28)
 
-                Text("無制限アンロック")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .padding(.bottom, 12)
+                    Text("すでに購入済みです")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.bottom, 12)
 
-                Text("無料版は履歴\(StoreManager.historyLimit)件まで。\nアンロックすると動画を無制限に追加できます。")
-                    .multilineTextAlignment(.center)
+                    Text("動画を無制限に追加できます。")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+                } else {
+                    Image(systemName: "film.stack.fill")
+                        .font(.system(size: 72))
+                        .foregroundStyle(.tint)
+                        .padding(.bottom, 28)
+
+                    Text("無制限アンロック")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding(.bottom, 12)
+
+                    Text("無料版は履歴\(StoreManager.historyLimit)件まで。\nアンロックすると動画を無制限に追加できます。")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    ProductView(id: StoreManager.productID)
+                        .padding(.horizontal, 40)
+
+                    Button("購入を復元") {
+                        Task { await store.restore() }
+                    }
                     .foregroundStyle(.secondary)
-
-                Spacer()
-
-                ProductView(id: StoreManager.productID)
-                    .padding(.horizontal, 40)
-
-                Button("購入を復元") {
-                    Task { await store.restore() }
+                    .disabled(store.isLoading)
+                    .padding(.top, 16)
+                    .padding(.bottom, 12)
                 }
-                .foregroundStyle(.secondary)
-                .disabled(store.isLoading)
-                .padding(.top, 16)
-                .padding(.bottom, 12)
             }
             .padding()
             .toolbar {

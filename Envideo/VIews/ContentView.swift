@@ -90,13 +90,12 @@ struct ContentView: View {
                 bottomBar
             }
             .toolbar {
-                if !store.isPurchased {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            isPaywallPresented = true
-                        } label: {
-                            Label("Envideo Pro", systemImage: "crown")
-                        }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isPaywallPresented = true
+                    } label: {
+                        Label("Envideo Pro",
+                              systemImage: store.isPurchased ? "crown.fill" : "crown")
                     }
                 }
             }

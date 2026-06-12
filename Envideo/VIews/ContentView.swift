@@ -1,6 +1,7 @@
 import SwiftUI
 import AVKit
 import PhotosUI
+import StoreKit
 import UniformTypeIdentifiers
 internal import Combine
 
@@ -29,6 +30,7 @@ struct ContentView: View {
 
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
+    @Environment(\.requestReview) private var requestReview
 
     @State var thumbnails: [String: Image] = [:]
     @State var videoHistory: [HistoryItem] = []
@@ -44,6 +46,7 @@ struct ContentView: View {
     @State var isYouTubeAddPresented = false
     @State var isYouTubeBrowserPresented = false
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @AppStorage("hasRequestedReview") private var hasRequestedReview = false
     @State private var isOnboardingPresented = false
     @State private var didSetupRemoteCommands = false
 
@@ -178,6 +181,12 @@ struct ContentView: View {
                                 await dismissImmersiveSpace()
                             }
                             isFullScreen = false
+                            // 初回の再生完了でレビューを依頼(以後は表示しない)
+                            if !hasRequestedReview {
+                                hasRequestedReview = true
+                                try? await Task.sleep(for: .seconds(1))
+                                requestReview()
+                            }
                         }
                     },
                     isPresented: $isFullScreen

@@ -128,9 +128,6 @@ struct ContentView: View {
                 thumbnails[item.key] = nil
                 generateThumbnail(for: item)
             }
-            .onChange(of: store.isPurchased) { _, isPurchased in
-                if !isPurchased { trimHistoryToLimit() }
-            }
             .onChange(of: selectedItem) { _, item in
                 isFullScreen = item != nil
             }

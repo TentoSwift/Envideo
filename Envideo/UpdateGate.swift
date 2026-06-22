@@ -66,7 +66,6 @@ struct UpdateRequiredView: View {
             .padding(.top, 8)
         }
         .padding(40)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea()
+        .frame(minWidth: 420, minHeight: 480)
     }
 }

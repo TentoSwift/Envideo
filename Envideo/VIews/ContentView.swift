@@ -57,15 +57,15 @@ struct ContentView: View {
     @State private var updateChecker = UpdateChecker()
 
     var body: some View {
-        Group {
-            if updateChecker.updateRequired {
-                // 強制アップデート: これ以外の UI は一切描画しない(ornament 含む)
+        mainContent
+            .task { await updateChecker.check() }
+            // 強制アップデート: 閉じられない sheet で表示。背後の ornament も隠して
+            // 操作を完全に塞ぐ(setter を空にして外部からの dismiss も無効化)
+            .sheet(isPresented: Binding(get: { updateChecker.updateRequired },
+                                        set: { _ in })) {
                 UpdateRequiredView(appStoreURL: updateChecker.appStoreURL)
-            } else {
-                mainContent
+                    .interactiveDismissDisabled()
             }
-        }
-        .task { await updateChecker.check() }
     }
 
     private var mainContent: some View {
@@ -104,7 +104,8 @@ struct ContentView: View {
                 }
             }
             .ignoresSafeArea()
-            .ornament(visibility: .visible, attachmentAnchor: .scene(.bottom)) {
+            .ornament(visibility: updateChecker.updateRequired ? .hidden : .visible,
+                      attachmentAnchor: .scene(.bottom)) {
                 bottomBar
             }
             .toolbar {

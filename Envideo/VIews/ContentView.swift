@@ -54,8 +54,21 @@ struct ContentView: View {
     @AppStorage("hasRequestedReview") private var hasRequestedReview = false
     @State private var isOnboardingPresented = false
     @State private var didSetupRemoteCommands = false
+    @State private var updateChecker = UpdateChecker()
 
     var body: some View {
+        mainContent
+            .task { await updateChecker.check() }
+            // 強制アップデート: 閉じられない sheet で表示。背後の ornament も隠して
+            // 操作を完全に塞ぐ(setter を空にして外部からの dismiss も無効化)
+            .sheet(isPresented: Binding(get: { updateChecker.updateRequired },
+                                        set: { _ in })) {
+                UpdateRequiredView(appStoreURL: updateChecker.appStoreURL)
+                    .interactiveDismissDisabled()
+            }
+    }
+
+    private var mainContent: some View {
         NavigationStack {
             Group {
                 if videoHistory.isEmpty {
@@ -91,7 +104,8 @@ struct ContentView: View {
                 }
             }
             .ignoresSafeArea()
-            .ornament(visibility: .visible, attachmentAnchor: .scene(.bottom)) {
+            .ornament(visibility: updateChecker.updateRequired ? .hidden : .visible,
+                      attachmentAnchor: .scene(.bottom)) {
                 bottomBar
             }
             .toolbar {

@@ -185,7 +185,9 @@ struct WebViewRepresentable: UIViewRepresentable {
         weak var webView: WKWebView?
         var lastNavigationID: UUID? = nil
 
-        private static let videoExts: Set<String> = ["mp4", "mov", "m4v", "mkv", "m3u8", "ts", "avi"]
+        // AVPlayer(AVFoundation)で再生できる形式のみを検出対象にする。
+        // mkv/avi は検出しても再生できず「開けるのに失敗する」混乱を生むため除外。
+        private static let videoExts: Set<String> = ["mp4", "mov", "m4v", "m3u8", "ts"]
 
         init(urlInput: Binding<String>, isLoading: Binding<Bool>,
              canGoBack: Binding<Bool>, canGoForward: Binding<Bool>,

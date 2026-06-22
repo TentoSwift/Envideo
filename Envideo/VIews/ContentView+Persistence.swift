@@ -163,25 +163,12 @@ extension ContentView {
     }
 
     func loadHistory() {
-        var items = loadHistoryItemsFromStorage()
-        if !store.isPurchased && items.count > StoreManager.historyLimit {
-            items = Array(items.prefix(StoreManager.historyLimit))
-            saveHistoryItemsToStorage(items)
-        }
-        videoHistory = items
-    }
-
-    func trimHistoryToLimit() {
-        guard videoHistory.count > StoreManager.historyLimit else { return }
-        let trimmed = Array(videoHistory.prefix(StoreManager.historyLimit))
-        if let selected = selectedItem, !trimmed.contains(where: { $0.key == selected.key }) {
-            playerController.player?.pause()
-            playerController.player?.replaceCurrentItem(with: nil)
-            isFullScreen = false
-            selectedItem = nil
-        }
-        saveHistoryItemsToStorage(trimmed)
-        videoHistory = trimmed
+        // 履歴は常に全件読み込む。無料制限は新規追加時(insertHistoryItem)のみで
+        // 適用し、保存済みの履歴は決して削除しない。
+        // 旧実装は購入状態が確定する前(StoreManager.refresh は非同期)に起動時の
+        // loadHistory が走ると、有料ユーザーでも isPurchased=false と誤判定して
+        // 履歴を3件に切り詰めて保存し、4件目以降を永久削除していた。
+        videoHistory = loadHistoryItemsFromStorage()
     }
 
     func deleteHistory(_ item: HistoryItem) {

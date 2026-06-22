@@ -128,8 +128,12 @@ struct ContentView: View {
                     }
                 }
                 #if canImport(VLCKit)
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("VLC") { showVLCTest = true }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showVLCTest = true
+                    } label: {
+                        Label("VLC テスト", systemImage: "ladybug")
+                    }
                 }
                 #endif
             }

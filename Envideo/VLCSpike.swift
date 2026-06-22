@@ -78,10 +78,16 @@ struct VLCTestView: View {
                     Image(systemName: "film.stack")
                         .font(.system(size: 56))
                         .foregroundStyle(.secondary)
-                    Text("VLC で再生するファイルを選択")
+                    Text("VLC 再生テスト")
                         .font(.title3)
-                    Button("ファイルを選択") { picking = true }
-                        .buttonStyle(.borderedProminent)
+
+                    // 同梱の MKV をワンタップ再生(ファイル取り込み不要・シミュレータ可)
+                    Button("同梱サンプル(MKV)を再生") {
+                        pickedURL = Bundle.main.url(forResource: "sample", withExtension: "mkv")
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("ファイルを選択して再生") { picking = true }
                     Text("MKV / AVI / WMV / FLV / WebM などを試せます")
                         .font(.caption)
                         .foregroundStyle(.secondary)

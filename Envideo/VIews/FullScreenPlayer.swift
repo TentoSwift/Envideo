@@ -138,7 +138,9 @@ struct FullScreenPlayerView: UIViewControllerRepresentable {
             selectedKey: item.key, onSelect: onSelect
         )
         let inImmersive = CinemaState.shared.isImmersiveOpen
-        let seatPicker = SeatPickerView()
+        // 固定高さのパネルに収めるため ScrollView で包む。アクセシビリティの
+        // 大きい文字で見出し+Picker が高くなっても縦に見切れずスクロールできる
+        let seatPicker = ScrollView { SeatPickerView() }
 
         let upNextHC: UIHostingController<UpNextView>
         if let existing = vc.customInfoViewControllers.first as? UIHostingController<UpNextView> {
@@ -152,15 +154,15 @@ struct FullScreenPlayerView: UIViewControllerRepresentable {
 
         var controllers: [UIViewController] = [upNextHC]
         if inImmersive {
-            let seatHC: UIHostingController<SeatPickerView>
+            let seatHC: UIHostingController<ScrollView<SeatPickerView>>
             if vc.customInfoViewControllers.count >= 2,
-               let existingSeat = vc.customInfoViewControllers[1] as? UIHostingController<SeatPickerView> {
+               let existingSeat = vc.customInfoViewControllers[1] as? UIHostingController<ScrollView<SeatPickerView>> {
                 seatHC = existingSeat
                 seatHC.rootView = seatPicker
             } else {
                 seatHC = UIHostingController(rootView: seatPicker)
                 seatHC.title = String(localized: "座席")
-                seatHC.preferredContentSize = CGSize(width: 900, height: 180)
+                seatHC.preferredContentSize = CGSize(width: 900, height: 200)
             }
             controllers.append(seatHC)
         }

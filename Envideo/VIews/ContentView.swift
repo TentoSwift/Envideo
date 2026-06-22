@@ -54,8 +54,21 @@ struct ContentView: View {
     @AppStorage("hasRequestedReview") private var hasRequestedReview = false
     @State private var isOnboardingPresented = false
     @State private var didSetupRemoteCommands = false
+    @State private var updateChecker = UpdateChecker()
 
     var body: some View {
+        Group {
+            if updateChecker.updateRequired {
+                // 強制アップデート: これ以外の UI は一切描画しない(ornament 含む)
+                UpdateRequiredView(appStoreURL: updateChecker.appStoreURL)
+            } else {
+                mainContent
+            }
+        }
+        .task { await updateChecker.check() }
+    }
+
+    private var mainContent: some View {
         NavigationStack {
             Group {
                 if videoHistory.isEmpty {

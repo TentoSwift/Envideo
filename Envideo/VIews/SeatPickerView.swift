@@ -6,17 +6,6 @@ struct SeatPickerView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("環境")
-                    .font(.headline)
-                Picker("環境", selection: $state.environment) {
-                    ForEach(CinemaEnvironment.allCases) { env in
-                        Text(env.localizedTitle).tag(env)
-                    }
-                }
-                .pickerStyle(.segmented)
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
                 Text("列")
                     .font(.headline)
                 Picker("列", selection: $state.row) {

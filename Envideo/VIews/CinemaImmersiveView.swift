@@ -56,30 +56,6 @@ enum CinemaTier: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
-// MARK: - 環境(Blenderシーン)
-
-enum CinemaEnvironment: String, CaseIterable, Identifiable, Hashable {
-    case classic
-    case rich
-
-    var id: String { rawValue }
-
-    var localizedTitle: LocalizedStringKey {
-        switch self {
-        case .classic: return "クラシック"
-        case .rich:    return "リッチシアター"
-        }
-    }
-
-    /// RealityKitContent 内の読み込むシーン名
-    var sceneName: String {
-        switch self {
-        case .classic: return "CinemaScene"
-        case .rich:    return "RichCinemaScene"
-        }
-    }
-}
-
 // MARK: - 共有状態
 
 @MainActor
@@ -89,17 +65,12 @@ final class CinemaState {
 
     private static let rowKey = "seatRow"
     private static let tierKey = "seatTier"
-    private static let envKey = "cinemaEnvironment"
 
     var row: CinemaRow = .middle {
         didSet { UserDefaults.standard.set(row.rawValue, forKey: Self.rowKey) }
     }
     var tier: CinemaTier = .floor {
         didSet { UserDefaults.standard.set(tier.rawValue, forKey: Self.tierKey) }
-    }
-    /// 読み込む映画館シーン(クラシック / リッチ)
-    var environment: CinemaEnvironment = .classic {
-        didSet { UserDefaults.standard.set(environment.rawValue, forKey: Self.envKey) }
     }
     var isImmersiveOpen: Bool = false
 
@@ -118,10 +89,6 @@ final class CinemaState {
            let saved = CinemaTier(rawValue: raw) {
             tier = saved
         }
-        if let raw = UserDefaults.standard.string(forKey: Self.envKey),
-           let saved = CinemaEnvironment(rawValue: raw) {
-            environment = saved
-        }
     }
 }
 
@@ -135,22 +102,8 @@ struct CinemaImmersiveView: View {
     @State private var state = CinemaState.shared
 
     var body: some View {
-        sceneView
-            .onAppear {
-                CinemaState.shared.isImmersiveOpen = true
-                NotificationCenter.default.post(name: .cinemaImmersiveStateChanged, object: nil)
-            }
-            .onDisappear {
-                CinemaState.shared.isImmersiveOpen = false
-                NotificationCenter.default.post(name: .cinemaImmersiveStateChanged, object: nil)
-            }
-    }
-
-    /// 環境を切り替えたときだけ `.id` でシーンを丸ごと再ロードする。
-    /// 座席(列/高さ)の変更は update クロージャ内の平行移動だけで反映する。
-    private var sceneView: some View {
         RealityView { content in
-            guard let scene = try? await Entity(named: state.environment.sceneName,
+            guard let scene = try? await Entity(named: "CinemaScene",
                                                 in: realityKitContentBundle) else {
                 return
             }
@@ -164,7 +117,14 @@ struct CinemaImmersiveView: View {
                 entity.position = state.sceneOffset
             }
         }
-        .id(state.environment)
+        .onAppear {
+            CinemaState.shared.isImmersiveOpen = true
+            NotificationCenter.default.post(name: .cinemaImmersiveStateChanged, object: nil)
+        }
+        .onDisappear {
+            CinemaState.shared.isImmersiveOpen = false
+            NotificationCenter.default.post(name: .cinemaImmersiveStateChanged, object: nil)
+        }
     }
 
     private static func applyUnlit(to entity: Entity) {

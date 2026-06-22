@@ -55,6 +55,9 @@ struct ContentView: View {
     @State private var isOnboardingPresented = false
     @State private var didSetupRemoteCommands = false
     @State private var updateChecker = UpdateChecker()
+    #if canImport(VLCKit)
+    @State private var showVLCTest = false
+    #endif
 
     var body: some View {
         mainContent
@@ -124,7 +127,15 @@ struct ContentView: View {
                               systemImage: store.isPurchased ? "crown.fill" : "crown")
                     }
                 }
+                #if canImport(VLCKit)
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("VLC") { showVLCTest = true }
+                }
+                #endif
             }
+            #if canImport(VLCKit)
+            .sheet(isPresented: $showVLCTest) { VLCTestView() }
+            #endif
             .onAppear {
                 loadHistory()
                 loadPositions()
